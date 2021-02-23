@@ -1,0 +1,320 @@
+﻿<Window
+	x:Class="JocysCom.Tools.E2EETool.MainWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:JocysCom.Tools.E2EETool"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	Title="Title"
+	Width="720"
+	Height="600"
+	Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+	Icon="App.ico"
+	mc:Ignorable="d">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="JocysCom/Controls/Themes/Default.xaml" />
+				<ResourceDictionary Source="Resources/Icons/Icons_Default.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="50*" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="50*" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="50*" />
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="50*" />
+			<ColumnDefinition Width="Auto" />
+		</Grid.ColumnDefinitions>
+		<Grid Grid.Row="0" Grid.ColumnSpan="4" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<Label
+				Name="HelpHeadLabel"
+				Grid.Row="0"
+				Grid.Column="0"
+				Grid.ColumnSpan="2"
+				Margin="8,3,3,3"
+				Padding="0"
+				Content="Jocys.com End-to-End Encryption Tool"
+				FontWeight="Bold" />
+			<ContentControl
+				Name="LeftIcon"
+				Grid.Row="1"
+				Grid.Column="0"
+				Width="24"
+				Height="24"
+				Margin="8,0,3,3"
+				Padding="0"
+				Content="{StaticResource Icon_information}"
+				Style="{StaticResource ButtonContentControl}" />
+			<TextBlock
+				Name="HelpBodyLabel"
+				Grid.Row="1"
+				Grid.Column="1"
+				Width="Auto"
+				Margin="3,0,3,3"
+				Padding="0"
+				HorizontalAlignment="Left"
+				VerticalAlignment="Top"
+				TextWrapping="Wrap">
+				Description
+			</TextBlock>
+			<ContentControl
+				Name="RightIcon"
+				Grid.Row="0"
+				Grid.RowSpan="2"
+				Grid.Column="2"
+				Width="48"
+				Height="48"
+				Margin="4,4,8,4"
+				Padding="0"
+				Content="{StaticResource Icon_lock}"
+				Style="{StaticResource ButtonContentControl}" />
+
+		</Grid>
+		<TextBlock
+			Name="Step1TextBLock"
+			Grid.Row="1"
+			Grid.Column="0"
+			HorizontalAlignment="Left"
+			Text="Step 1: Generate your encryption keys" />
+		<Button
+			x:Name="GenerateButton"
+			Grid.Row="1"
+			Grid.Column="1"
+			MinWidth="75"
+			Margin="0,4,4,0"
+			VerticalAlignment="Center"
+			Click="GenerateButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_add}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Generate" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+		<TextBox
+			x:Name="PrivateKeyTextBox"
+			Grid.Row="2"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			MinLines="5"
+			TextChanged="PrivateKeyTextBox_TextChanged"
+			TextWrapping="Wrap"
+			Visibility="Collapsed" />
+		<GroupBox
+			Grid.Row="1"
+			Grid.RowSpan="2"
+			Grid.Column="2"
+			Grid.ColumnSpan="2"
+			Header="Options">
+			<WrapPanel>
+				<CheckBox
+					Name="AlwaysOnTopCheckBox"
+					Checked="AlwaysOnTopCheckBox_Checked"
+					Content="Always on Top"
+					Unchecked="AlwaysOnTopCheckBox_Checked" />
+				<CheckBox
+					Name="ShowPrivateKeyCheckBox"
+					Checked="ShowPrivateKeyCheckBox_Checked"
+					Content="ShowPrivateKey"
+					Unchecked="ShowPrivateKeyCheckBox_Checked" />
+				<StackPanel
+					Grid.Row="1"
+					Grid.Column="2"
+					Grid.ColumnSpan="2"
+					Orientation="Horizontal">
+					<TextBlock Text="Source Code:" />
+					<TextBlock Margin="0" Padding="4,2,2,2">
+						<Hyperlink NavigateUri="https://github.com/JocysCom/E2EETool" RequestNavigate="HyperLink_RequestNavigate" TextDecorations="">
+							https://github.com/JocysCom/E2EETool
+						</Hyperlink>
+					</TextBlock>
+
+
+				</StackPanel>
+			</WrapPanel>
+		</GroupBox>
+		<TextBlock
+			Grid.Row="3"
+			Grid.Column="0"
+			Margin="4,0,0,0"
+			Text="Step 2: Share this Public Key with other party:" />
+		<Button
+			x:Name="CopyPublicKeyButton"
+			Grid.Row="3"
+			Grid.Column="1"
+			MinWidth="75"
+			Margin="0,0,4,0"
+			VerticalAlignment="Center"
+			Click="CopyPublicKeyButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_copy}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Copy" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+		<TextBox
+			x:Name="PublicKeyTextBox"
+			Grid.Row="4"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			MinLines="5"
+			TextChanged="PublicKeyTextBox_TextChanged"
+			TextWrapping="Wrap" />
+		<TextBlock
+			Grid.Row="3"
+			Grid.Column="2"
+			Margin="4,0,0,0"
+			Text="Step 3: Paste Public Key from other party" />
+		<Button
+			x:Name="PasteOtherPublicKeyButton"
+			Grid.Row="3"
+			Grid.Column="3"
+			MinWidth="75"
+			Margin="0,0,4,0"
+			VerticalAlignment="Center"
+			Click="PasteOtherPublicKeyButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_clipboard_paste}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Paste" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+
+
+		<TextBox
+			x:Name="OtherPublicKeyTextBox"
+			Grid.Row="4"
+			Grid.Column="2"
+			Grid.ColumnSpan="2"
+			MinLines="5"
+			TextChanged="OtherPublicKeyTextBox_TextChanged"
+			TextWrapping="Wrap" />
+
+		<TextBlock Grid.Row="5" Grid.Column="0" Text="Type plain text and encrypt:" />
+		<Button
+			x:Name="EncryptButton"
+			Grid.Row="5"
+			Grid.Column="1"
+			MinWidth="75"
+			Margin="0,0,4,0"
+			Click="EncryptButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_inbox_into}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Encrypt" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+
+		<TextBox
+			x:Name="DataTextBox"
+			Grid.Row="6"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			VerticalAlignment="Stretch"
+			MinLines="5" />
+		<TextBlock Grid.Row="7" Grid.Column="0" Text="Copy and send encrypted data to other party:" />
+		<Button
+			x:Name="CopyEncryptedDataButton"
+			Grid.Row="7"
+			Grid.Column="1"
+			MinWidth="75"
+			Margin="0,0,4,0"
+			VerticalAlignment="Center"
+			Click="CopyEncryptedDataButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_copy}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Copy" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+		<TextBox
+			x:Name="EncryptedDataTextBox"
+			Grid.Row="8"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			VerticalAlignment="Stretch"
+			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			IsReadOnly="True"
+			MinLines="5" />
+
+		<TextBlock Grid.Row="5" Grid.Column="2" Text="Paste encrypted data from other party:" />
+
+		<TextBox
+			x:Name="OtherEncryptedDataTextBox"
+			Grid.Row="6"
+			Grid.Column="2"
+			Grid.ColumnSpan="2"
+			VerticalAlignment="Stretch"
+			MinLines="5" />
+
+
+
+		<Button
+			x:Name="PasteEncryptedDataPublicKeyButton"
+			Grid.Row="5"
+			Grid.Column="3"
+			MinWidth="75"
+			Margin="0,0,4,0"
+			VerticalAlignment="Center"
+			Click="PasteEncryptedDataPublicKeyButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_clipboard_paste}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Paste" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+
+
+
+
+		<Button
+			x:Name="DecryptButton"
+			Grid.Row="7"
+			Grid.Column="3"
+			Margin="0,0,0,0"
+			HorizontalAlignment="Left"
+			Click="DecryptButton_Click"
+			Style="{StaticResource ToolBarButton}">
+			<StackPanel Style="{StaticResource ButtonStackPanel}">
+				<ContentControl Content="{StaticResource Icon_inbox_into}" Style="{StaticResource ButtonContentControl}" />
+				<Label Content="Decrypt" Style="{StaticResource ButtonLabel}" />
+			</StackPanel>
+		</Button>
+
+		<TextBlock Grid.Row="7" Grid.Column="2" Text="Decrypted data from other party:" />
+		<TextBox
+			x:Name="DecryptedTextBox"
+			Grid.Row="8"
+			Grid.Column="2"
+			Grid.ColumnSpan="2"
+			VerticalAlignment="Stretch"
+			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			IsReadOnly="True"
+			MinLines="5" />
+
+	</Grid>
+</Window>

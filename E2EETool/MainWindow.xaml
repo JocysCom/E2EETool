@@ -118,8 +118,13 @@
 			Grid.Row="2"
 			Grid.Column="0"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
 			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
 			TextChanged="PrivateKeyTextBox_TextChanged"
 			TextWrapping="Wrap"
 			Visibility="Collapsed" />
@@ -151,8 +156,6 @@
 							https://github.com/JocysCom/E2EETool
 						</Hyperlink>
 					</TextBlock>
-
-
 				</StackPanel>
 			</WrapPanel>
 		</GroupBox>
@@ -180,8 +183,13 @@
 			Grid.Row="4"
 			Grid.Column="0"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
 			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
 			TextChanged="PublicKeyTextBox_TextChanged"
 			TextWrapping="Wrap" />
 		<TextBlock
@@ -210,7 +218,12 @@
 			Grid.Row="4"
 			Grid.Column="2"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			AcceptsReturn="True"
 			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
 			TextChanged="OtherPublicKeyTextBox_TextChanged"
 			TextWrapping="Wrap" />
 
@@ -234,8 +247,13 @@
 			Grid.Row="6"
 			Grid.Column="0"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
-			MinLines="5" />
+			AcceptsReturn="True"
+			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextWrapping="Wrap" />
 		<TextBlock Grid.Row="7" Grid.Column="0" Text="Copy and send encrypted data to other party:" />
 		<Button
 			x:Name="CopyEncryptedDataButton"
@@ -256,11 +274,15 @@
 			Grid.Row="8"
 			Grid.Column="0"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
+			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
 			IsReadOnly="True"
-			MinLines="5" />
-
+			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextWrapping="Wrap" />
 		<TextBlock Grid.Row="5" Grid.Column="2" Text="Paste encrypted data from other party:" />
 
 		<TextBox
@@ -268,8 +290,13 @@
 			Grid.Row="6"
 			Grid.Column="2"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
-			MinLines="5" />
+			AcceptsReturn="True"
+			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextWrapping="Wrap" />
 
 
 
@@ -311,10 +338,15 @@
 			Grid.Row="8"
 			Grid.Column="2"
 			Grid.ColumnSpan="2"
+			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
+			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
 			IsReadOnly="True"
-			MinLines="5" />
+			MinLines="5"
+			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextWrapping="Wrap" />
 
 	</Grid>
 </Window>

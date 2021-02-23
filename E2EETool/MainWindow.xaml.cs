@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using JocysCom.ClassLibrary.Configuration;
+using System.IO;
 
 namespace JocysCom.Tools.E2EETool
 {
@@ -46,6 +47,29 @@ namespace JocysCom.Tools.E2EETool
 			PrivateKeyTextBox.Text = System.Convert.ToBase64String(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob));
 		}
 
+		private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
+		private static int _randomSize = 256 / 8;
+
+		public static byte[] AddRandom(byte[] bytes)
+		{
+			// Append random prefix.
+			var ms = new MemoryStream();
+			var randomBytes = new byte[_randomSize];
+			_random.GetBytes(randomBytes);
+			ms.Write(randomBytes);
+			ms.Write(bytes);
+			var resultBytes = ms.ToArray();
+			ms.Dispose();
+			return resultBytes;
+		}
+
+		public static byte[] RemoveRandom(byte[] bytes)
+		{
+			var data = new byte[bytes.Length - _randomSize];
+			Array.Copy(bytes, _randomSize, data, 0, data.Length);
+			return data;
+		}
+
 		private void EncryptButton_Click(object sender, RoutedEventArgs e)
 		{
 			EncryptedDataTextBox.Text = "Encrypting...";
@@ -64,6 +88,8 @@ namespace JocysCom.Tools.E2EETool
 				var symetricKeyBase64 = System.Convert.ToBase64String(symetricKey);
 
 				var dataBytes = System.Text.Encoding.UTF8.GetBytes(DataTextBox.Text);
+				// Append random prefix.
+				dataBytes = AddRandom(dataBytes);
 				var encryptedBytes = Encrypt(symetricKey, dataBytes);
 				var encryptedBase64 = System.Convert.ToBase64String(encryptedBytes);
 
@@ -99,6 +125,8 @@ namespace JocysCom.Tools.E2EETool
 
 				var encryptedBytes = System.Convert.FromBase64String(OtherEncryptedDataTextBox.Text);
 				var decryptedBytes = Decrypt(symetricKey, encryptedBytes);
+				// Remove random prefix.
+				decryptedBytes = RemoveRandom(decryptedBytes);
 				var decryptedData = System.Text.Encoding.UTF8.GetString(decryptedBytes);
 
 				DecryptedTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
@@ -267,6 +295,7 @@ namespace JocysCom.Tools.E2EETool
 		{
 			OtherEncryptedDataTextBox.Text = "";
 			OtherEncryptedDataTextBox.Text = Clipboard.GetText(TextDataFormat.Text);
+			DecryptButton_Click(null, null);
 		}
 
 		private void CopyEncryptedDataButton_Click(object sender, RoutedEventArgs e)

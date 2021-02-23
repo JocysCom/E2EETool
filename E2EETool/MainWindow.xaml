@@ -9,6 +9,7 @@
 	Width="720"
 	Height="600"
 	Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+	Closing="Window_Closing"
 	Icon="App.ico"
 	mc:Ignorable="d">
 	<Window.Resources>
@@ -122,6 +123,7 @@
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			FontFamily="Consolas"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 			ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -163,7 +165,7 @@
 			Grid.Row="3"
 			Grid.Column="0"
 			Margin="4,0,0,0"
-			Text="Step 2: Share this Public Key with other party:" />
+			Text="Step 2: Share this Public Key with other party" />
 		<Button
 			x:Name="CopyPublicKeyButton"
 			Grid.Row="3"
@@ -187,6 +189,7 @@
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			FontFamily="Consolas"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 			ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -221,13 +224,14 @@
 			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
+			FontFamily="Consolas"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 			ScrollViewer.VerticalScrollBarVisibility="Auto"
 			TextChanged="OtherPublicKeyTextBox_TextChanged"
 			TextWrapping="Wrap" />
 
-		<TextBlock Grid.Row="5" Grid.Column="0" Text="Type plain text and encrypt:" />
+		<TextBlock Grid.Row="5" Grid.Column="0" Text="Type plain text and encrypt" />
 		<Button
 			x:Name="EncryptButton"
 			Grid.Row="5"
@@ -250,11 +254,13 @@
 			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
+			FontFamily="Consolas"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextChanged="DataTextBox_TextChanged"
 			TextWrapping="Wrap" />
-		<TextBlock Grid.Row="7" Grid.Column="0" Text="Copy and send encrypted data to other party:" />
+		<TextBlock Grid.Row="7" Grid.Column="0" Text="Copy and send encrypted data to other party" />
 		<Button
 			x:Name="CopyEncryptedDataButton"
 			Grid.Row="7"
@@ -278,12 +284,14 @@
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			FontFamily="Consolas"
 			IsReadOnly="True"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextChanged="EncryptedDataTextBox_TextChanged"
 			TextWrapping="Wrap" />
-		<TextBlock Grid.Row="5" Grid.Column="2" Text="Paste encrypted data from other party:" />
+		<TextBlock Grid.Row="5" Grid.Column="2" Text="Paste encrypted data from other party" />
 
 		<TextBox
 			x:Name="OtherEncryptedDataTextBox"
@@ -293,9 +301,11 @@
 			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
+			FontFamily="Consolas"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 			ScrollViewer.VerticalScrollBarVisibility="Auto"
+			TextChanged="OtherEncryptedDataTextBox_TextChanged"
 			TextWrapping="Wrap" />
 
 
@@ -332,9 +342,9 @@
 			</StackPanel>
 		</Button>
 
-		<TextBlock Grid.Row="7" Grid.Column="2" Text="Decrypted data from other party:" />
+		<TextBlock Grid.Row="7" Grid.Column="2" Text="Decrypted data from other party" />
 		<TextBox
-			x:Name="DecryptedTextBox"
+			x:Name="OtherDecryptedTextBox"
 			Grid.Row="8"
 			Grid.Column="2"
 			Grid.ColumnSpan="2"
@@ -342,6 +352,7 @@
 			VerticalAlignment="Stretch"
 			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			FontFamily="Consolas"
 			IsReadOnly="True"
 			MinLines="5"
 			ScrollViewer.HorizontalScrollBarVisibility="Disabled"

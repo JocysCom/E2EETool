@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Security.Cryptography;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using JocysCom.ClassLibrary.Configuration;
 using System.IO;
+using System.Text;
 
 namespace JocysCom.Tools.E2EETool
 {
@@ -36,15 +28,18 @@ namespace JocysCom.Tools.E2EETool
 			AlwaysOnTopCheckBox_Checked(null, null);
 			UpdateDataControls();
 			var ai = new AssemblyInfo();
-			Title = ai.GetTitle(false, false, true,false, false);
+			Title = ai.GetTitle(false, false, true, false, false);
 			HelpBodyLabel.Text = ai.Description;
+			_DelayTimer = new System.Timers.Timer(500);
+			_DelayTimer.AutoReset = false;
+			_DelayTimer.Elapsed += _DelayTimer_Elapsed;
 		}
 
 		private void GenerateButton_Click(object sender, RoutedEventArgs e)
 		{
 			var ecdh = GetNewEcdhProvider(384);
-			PublicKeyTextBox.Text = System.Convert.ToBase64String(ecdh.Key.Export(CngKeyBlobFormat.EccPublicBlob));
-			PrivateKeyTextBox.Text = System.Convert.ToBase64String(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob));
+			PublicKeyTextBox.Text = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPublicBlob));
+			PrivateKeyTextBox.Text = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob));
 		}
 
 		private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
@@ -70,8 +65,13 @@ namespace JocysCom.Tools.E2EETool
 			return data;
 		}
 
-		private void EncryptButton_Click(object sender, RoutedEventArgs e)
+		private void Encrypt()
 		{
+			if (string.IsNullOrEmpty(DataTextBox.Text))
+			{
+				EncryptedDataTextBox.Text = "";
+				return;
+			}
 			EncryptedDataTextBox.Text = "Encrypting...";
 			try
 			{
@@ -85,13 +85,13 @@ namespace JocysCom.Tools.E2EETool
 				var otherPartyPublicKey = CngKey.Import(otherPartyKeyBlob, CngKeyBlobFormat.EccPublicBlob);
 
 				var symetricKey = ecdh.DeriveKeyMaterial(otherPartyPublicKey);
-				var symetricKeyBase64 = System.Convert.ToBase64String(symetricKey);
+				var symetricKeyBase64 = ToBase64(symetricKey);
 
 				var dataBytes = System.Text.Encoding.UTF8.GetBytes(DataTextBox.Text);
 				// Append random prefix.
 				dataBytes = AddRandom(dataBytes);
 				var encryptedBytes = Encrypt(symetricKey, dataBytes);
-				var encryptedBase64 = System.Convert.ToBase64String(encryptedBytes);
+				var encryptedBase64 = ToBase64(encryptedBytes);
 
 				// Display the encrypted data.
 				EncryptedDataTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
@@ -106,9 +106,14 @@ namespace JocysCom.Tools.E2EETool
 
 		}
 
-		private void DecryptButton_Click(object sender, RoutedEventArgs e)
+		private void Decrypt()
 		{
-			DecryptedTextBox.Text = "Decrypting...";
+			if (string.IsNullOrEmpty(OtherEncryptedDataTextBox.Text))
+			{
+				OtherDecryptedTextBox.Text = "";
+				return;
+			}
+			OtherDecryptedTextBox.Text = "Decrypting...";
 			try
 			{
 				var keyBlob = System.Convert.FromBase64String(PrivateKeyTextBox.Text);
@@ -121,7 +126,7 @@ namespace JocysCom.Tools.E2EETool
 
 				// Decrypt the passed byte array and specify OAEP padding.
 				var symetricKey = ecdh.DeriveKeyMaterial(otherPartyPublicKey);
-				var symetricKeyBase64 = System.Convert.ToBase64String(symetricKey);
+				var symetricKeyBase64 = ToBase64(symetricKey);
 
 				var encryptedBytes = System.Convert.FromBase64String(OtherEncryptedDataTextBox.Text);
 				var decryptedBytes = Decrypt(symetricKey, encryptedBytes);
@@ -129,34 +134,17 @@ namespace JocysCom.Tools.E2EETool
 				decryptedBytes = RemoveRandom(decryptedBytes);
 				var decryptedData = System.Text.Encoding.UTF8.GetString(decryptedBytes);
 
-				DecryptedTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
-				DecryptedTextBox.Text = decryptedData;
+				OtherDecryptedTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
+				OtherDecryptedTextBox.Text = decryptedData;
 			}
 			catch (Exception ex)
 			{
-				DecryptedTextBox.Foreground = new SolidColorBrush(System.Windows.Media.Colors.DarkRed);
-				DecryptedTextBox.Text = ex.Message;
+				OtherDecryptedTextBox.Foreground = new SolidColorBrush(System.Windows.Media.Colors.DarkRed);
+				OtherDecryptedTextBox.Text = ex.Message;
 			}
 		}
 
-		protected CngKey GetEcdhKey(bool includePrivateParameters)
-		{
-			CngKey key = null;
-			//var format = includePrivateParameters
-			//	? CngKeyBlobFormat.EccPrivateBlob
-			//	: CngKeyBlobFormat.EccPublicBlob;
-			//var keyParams = KeyTextBox.Text;
-			//	// Import parameters from BLOB.
-			//	var keyBlob = System.Convert.FromBase64String(keyParams);
-			//	key = CngKey.Import(keyBlob, format);
-			//// Export ECDH key to ECDHParameters and include:
-			////    false - Only public key required for encryption.
-			////    true  - Private key required for decryption.
-			return key;
-		}
-
-
-		System.Security.Cryptography.ECDiffieHellmanCng GetNewEcdhProvider(int dwKeySize = 512)
+		ECDiffieHellmanCng GetNewEcdhProvider(int dwKeySize = 512)
 		{
 			var alg = CngAlgorithm.ECDiffieHellmanP256;
 			if (dwKeySize == 384)
@@ -332,9 +320,7 @@ namespace JocysCom.Tools.E2EETool
 		}
 
 		private void HyperLink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-		{
-			OpenUrl(e.Uri.AbsoluteUri);
-		}
+		=> OpenUrl(e.Uri.AbsoluteUri);
 
 		public void OpenUrl(string url)
 		{
@@ -368,6 +354,27 @@ namespace JocysCom.Tools.E2EETool
 			}
 		}
 
+		public static string ToBase64(byte[] bytes)
+		{
+			var s = Convert.ToBase64String(bytes);
+			s =  InsertNewLines(s, 64);
+			return s;
+		}
+		 
+
+		public static string InsertNewLines(string s, int len)
+		{
+			var sb = new StringBuilder(s.Length + (s.Length / len) + 1);
+			int start;
+			for (start = 0; start < s.Length - len; start += len)
+			{
+				sb.Append(s.Substring(start, len));
+				sb.Append(Environment.NewLine);
+			}
+			sb.Append(s.Substring(start));
+			return sb.ToString();
+		}
+
 		public static void LoadAndMonitor(INotifyPropertyChanged source, string sourceProperty, System.Windows.Controls.Control control, System.Windows.DependencyProperty controlProperty = null)
 		{
 			if (controlProperty == null)
@@ -385,14 +392,26 @@ namespace JocysCom.Tools.E2EETool
 			control.SetBinding(controlProperty, binding);
 		}
 
+		private void PrivateKeyTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			UpdateDataControls();
+			Encrypt();
+			Decrypt();
+		}
+
 		private void PublicKeyTextBox_TextChanged(object sender, TextChangedEventArgs e)
-			=> UpdateDataControls();
+		{
+			UpdateDataControls();
+			Encrypt();
+			Decrypt();
+		}
 
 		private void OtherPublicKeyTextBox_TextChanged(object sender, TextChangedEventArgs e)
-			=> UpdateDataControls();
-
-		private void PrivateKeyTextBox_TextChanged(object sender, TextChangedEventArgs e)
-			=> UpdateDataControls();
+		{
+			UpdateDataControls();
+			Encrypt();
+			Decrypt();
+		}
 
 		void UpdateDataControls()
 		{
@@ -404,5 +423,36 @@ namespace JocysCom.Tools.E2EETool
 			DecryptButton.IsEnabled = enabled;
 		}
 
+		private void Window_Closing(object sender, CancelEventArgs e)
+			=> Properties.Settings.Default.Save();
+
+		private void EncryptButton_Click(object sender, RoutedEventArgs e)
+			=> Encrypt();
+
+		private void DecryptButton_Click(object sender, RoutedEventArgs e)
+			=> Decrypt();
+
+		private void OtherEncryptedDataTextBox_TextChanged(object sender, TextChangedEventArgs e)
+			=> Decrypt();
+
+		private void EncryptedDataTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+		}
+
+		System.Timers.Timer _DelayTimer;
+
+		private void _DelayTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			Dispatcher.BeginInvoke(new Action(() =>
+			{
+				Encrypt();
+			}));
+		}
+
+		private void DataTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			_DelayTimer.Stop();
+			_DelayTimer.Start();
+		}
 	}
 }

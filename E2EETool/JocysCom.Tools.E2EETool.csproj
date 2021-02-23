@@ -8,7 +8,7 @@
     <Product>End-to-End Encryption Tool</Product>
     <ApplicationIcon>App.ico</ApplicationIcon>
     <Description>Protect and transmit sensitive information via unencrypted channels. Tools is using Elliptic Curve Diffie-Hellman (ECDH) key exchange (P-384 curve) and Advanced Encryption Standard (AES) 256-bit encryption algorithm.</Description>
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

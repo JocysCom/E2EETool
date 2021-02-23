@@ -249,7 +249,7 @@ namespace JocysCom.ClassLibrary.Configuration
 		/// This means that compiling assemblies under the same conditions (permalink)
 		/// would produce byte-for-byte equivalent binaries.
 		/// </remarks>
-		public static DateTime GetBuildDateTime(string filePath, TimeZoneInfo tzi = null)
+		public static DateTime GetBuildDateTime(string filePath)
 		{
 			// Constants related to the Windows PE file format.
 			const int PE_HEADER_OFFSET = 60; // 0x3C

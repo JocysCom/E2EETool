@@ -2,6 +2,12 @@
 
 Protect and transmit sensitive information via unencrypted channels. Tools is using Elliptic Curve Diffie-Hellman (ECDH) key exchange (P-384 curve) and Advanced Encryption Standard (AES) 256-bit encryption algorithm.
 
+# Download
+
+Digitally Signed Application v1.1.6.0 (2022-08-14)
+
+[Download - JocysCom.E2EETool.zip](https://github.com/JocysCom/E2EETool/releases/download/1.0.0.0/JocysCom.Tools.E2EETool.zip)
+
 ## How To Use It
 
 - Both parties should launch the application and press the [Generate] button.

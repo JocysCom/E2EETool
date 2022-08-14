@@ -4,11 +4,12 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Authors>Jocys.com</Authors>
+	  <UseWindowsForms>true</UseWindowsForms>
+	  <Authors>Jocys.com</Authors>
     <Product>End-to-End Encryption Tool</Product>
     <ApplicationIcon>App.ico</ApplicationIcon>
     <Description>Protect and transmit sensitive information via unencrypted channels. Tools is using Elliptic Curve Diffie-Hellman (ECDH) key exchange (P-384 curve) and Advanced Encryption Standard (AES) 256-bit encryption algorithm.</Description>
-    <Version>1.0.8</Version>
+    <Version>1.1.6</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,30 +20,19 @@
 
   <ItemGroup>
     <None Remove="App.ico" />
+    <None Remove="Documents\ChangeLog.txt" />
+    <None Remove="Documents\License.txt" />
     <None Remove="Resources\BuildDate.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Documents\ChangeLog.txt" />
+    <EmbeddedResource Include="Documents\License.txt" />
     <EmbeddedResource Include="Resources\BuildDate.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="App.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="IF NOT EXIST &quot;$(ProjectDir)Resources&quot; MKDIR &quot;$(ProjectDir)Resources&quot; 2&gt;nul&#xD;&#xA;PowerShell.exe -Command &quot;(Get-Date).ToString('o') | Out-File '$(ProjectDir)Resources\BuildDate.txt'&quot;&#xD;&#xA;" />

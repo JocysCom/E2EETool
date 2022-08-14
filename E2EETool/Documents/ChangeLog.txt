@@ -1,0 +1,13 @@
+2022-04-06 v1.1.6:
+- New: Added new options.
+- New: File encryption and decryption.
+- Updated: Shared libraries.
+- Updated: Interface.
+
+2021-02-23 v1.0.8:
+- Fixed: Settings saving.
+- Updated: Improved interface.
+
+2021-02-23 1.0.6:
+- New: Initial release.
+

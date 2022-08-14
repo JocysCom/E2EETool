@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace x360ce.App
+namespace JocysCom.Tools.E2EETool.Resources.Icons
 {
 	partial class Icons_Default : ResourceDictionary
 	{
@@ -16,6 +16,7 @@ namespace x360ce.App
 		public const string Icon_clipboard_paste = nameof(Icon_clipboard_paste);
 		public const string Icon_copy = nameof(Icon_copy);
 		public const string Icon_delete = nameof(Icon_delete);
+		public const string Icon_gearwheel = nameof(Icon_gearwheel);
 		public const string Icon_inbox_into = nameof(Icon_inbox_into);
 		public const string Icon_inbox_out = nameof(Icon_inbox_out);
 		public const string Icon_information = nameof(Icon_information);

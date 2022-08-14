@@ -20,8 +20,13 @@ Digitally Signed Application v1.1.6 (2022-08-14)
 
 Sender:
 
-![E2EETool](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool.png?raw=true "E2EETool")
+![E2EETool_Sender](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool.png?raw=true "E2EETool_Sender")
 
 Receiver:
 
-![E2EETool](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool_B.png?raw=true "E2EETool")
+![E2EETool_Receiver](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool_B.png?raw=true "E2EETool_Receiver")
+
+
+Options:
+
+![E2EETool_Options](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool_Options.png?raw=true "E2EETool_Options")

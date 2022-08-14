@@ -23,4 +23,4 @@ Sender:
 
 Receiver:
 
-![E2EETool](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool.png?raw=true "E2EETool")
+![E2EETool](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool_B.png?raw=true "E2EETool")

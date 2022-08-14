@@ -30,3 +30,7 @@ Receiver:
 Options:
 
 ![E2EETool_Options](https://github.com/JocysCom/E2EETool/blob/main/Documents/Images/JocysCom.Tools.E2EETool_Options.png?raw=true "E2EETool_Options")
+
+# Note for Developers
+
+The code part with encryption is here: [E2EETool/Controls/MainControl.xaml.cs](E2EETool/Controls/MainControl.xaml.cs)

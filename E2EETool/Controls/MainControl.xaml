@@ -86,7 +86,7 @@
 			Grid.Column="0"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Share your Public Key below with other party" />
+			Text="Share your Public Key below with the other party" />
 		<Button
 			x:Name="CopyPublicKeyButton"
 			Grid.Row="3"
@@ -125,7 +125,7 @@
 			Grid.Column="2"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Step 3: Paste Public Key from other party" />
+			Text="Paste Public Key from the other party" />
 		<Button
 			x:Name="PasteOtherPublicKeyButton"
 			Grid.Row="3"
@@ -209,7 +209,7 @@
 			Grid.Column="2"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Paste encrypted data from other party" />
+			Text="Paste encrypted data from the other party" />
 		<Button
 			x:Name="PasteEncryptedDataPublicKeyButton"
 			Grid.Row="6"
@@ -246,7 +246,7 @@
 			Grid.Column="0"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Copy and send encrypted data to other party" />
+			Text="Copy and send encrypted data to the other party" />
 		<Button
 			x:Name="CopyEncryptedDataButton"
 			Grid.Row="8"
@@ -299,7 +299,7 @@
 			Grid.Column="2"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Decrypted data from other party" />
+			Text="Decrypted data from the other party" />
 		<TextBox
 			x:Name="OtherDecryptedTextBox"
 			Grid.Row="9"

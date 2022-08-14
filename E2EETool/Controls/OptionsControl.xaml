@@ -21,6 +21,9 @@
 					<CheckBox Name="ShowPrivateKeyCheckBox" Content="Show Private Key" IsChecked="{Binding ShowPrivateKey, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 					<CheckBox Name="GenerateKeysOnApplicationStartCheckBox" Content="Generate Keys on Application Start" IsChecked="{Binding GenerateKeysOnApplicationStart, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 					<CheckBox Name="SaveKeysOnApplicationCloseCheckBox" Content="Save Keys on Application Close" IsChecked="{Binding SaveKeysOnApplicationClose, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+					<CheckBox Name="AddBase64KeyHeadersCheckBox" Content="Add Base64 Key Headers" IsChecked="{Binding AddBase64KeyHeaders, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+					<CheckBox Name="AddBase64MessageHeaders" Content="Add Base64 Message Headers" IsChecked="{Binding AddBase64MessageHeaders, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+					<CheckBox Name="AddBase64FileHeaders" Content="Add Base64 File Headers" IsChecked="{Binding AddBase64FileHeaders, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 				</WrapPanel>
 			</GroupBox>
 		</StackPanel>

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 
 namespace JocysCom.Tools.E2EETool
@@ -19,10 +20,10 @@ namespace JocysCom.Tools.E2EETool
 
 		[DefaultValue(true)]
 		public bool GenerateKeysOnApplicationStart { get => _GenerateKeysOnApplicationStart; set => SetProperty(ref _GenerateKeysOnApplicationStart, value); }
-		private bool _GenerateKeysOnApplicationStart = true;
+		private bool _GenerateKeysOnApplicationStart = false;
 
 		public bool SaveKeysOnApplicationClose { get => _SaveKeysOnApplicationClose; set => SetProperty(ref _SaveKeysOnApplicationClose, value); }
-		private bool _SaveKeysOnApplicationClose;
+		private bool _SaveKeysOnApplicationClose = true;
 
 		public string YourPublicKey { get => _YourPublicKey; set => SetProperty(ref _YourPublicKey, value); }
 		private string _YourPublicKey;
@@ -34,6 +35,15 @@ namespace JocysCom.Tools.E2EETool
 
 		public string FilePath { get => _FilePath; set => SetProperty(ref _FilePath, value); }
 		private string _FilePath;
+
+		public bool AddBase64KeyHeaders { get => _AddBase64KeyHeaders; set => SetProperty(ref _AddBase64KeyHeaders, value); }
+		private bool _AddBase64KeyHeaders = true;
+
+		public bool AddBase64MessageHeaders { get => _AddBase64MessageHeaders; set => SetProperty(ref _AddBase64MessageHeaders, value); }
+		private bool _AddBase64MessageHeaders = true;
+
+		public bool AddBase64FileHeaders { get => _AddBase64FileHeaders; set => SetProperty(ref _AddBase64FileHeaders, value); }
+		private bool _AddBase64FileHeaders = true;
 
 		#endregion
 

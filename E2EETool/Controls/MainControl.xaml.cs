@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using JocysCom.ClassLibrary.Controls;
+using static System.Net.Mime.MediaTypeNames;
+using System.Linq;
 
 namespace JocysCom.Tools.E2EETool.Controls
 {
@@ -68,8 +70,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 		public void GenerateKeys()
 		{
 			var ecdh = GetNewEcdhProvider(384);
-			Global.AppSettings.YourPublicKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPublicBlob));
-			Global.AppSettings.YourPrivateKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob));
+			Global.AppSettings.YourPublicKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPublicBlob), Base64HeaderType.PublicKey);
+			Global.AppSettings.YourPrivateKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob), Base64HeaderType.PrivateKey);
 		}
 
 		private void GenerateButton_Click(object sender, RoutedEventArgs e)
@@ -112,7 +114,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			{
 				var dataBytes = System.Text.Encoding.UTF8.GetBytes(DataTextBox.Text);
 				var encryptedBytes = Encrypt(dataBytes);
-				var encryptedBase64 = ToBase64(encryptedBytes);
+				var encryptedBase64 = ToBase64(encryptedBytes, Base64HeaderType.Message);
 				// Display the encrypted data.
 				EncryptedDataTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
 				EncryptedDataTextBox.Text = encryptedBase64;
@@ -127,11 +129,11 @@ namespace JocysCom.Tools.E2EETool.Controls
 		private byte[] Encrypt(byte[] dataBytes)
 		{
 			// Import parameters from BLOB.
-			var keyBlob = System.Convert.FromBase64String(PrivateKeyTextBox.Text);
+			var keyBlob = FromBase64(PrivateKeyTextBox.Text);
 			var privateKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob);
 			var ecdh = new System.Security.Cryptography.ECDiffieHellmanCng(privateKey);
 			// Encrypt the passed byte array.
-			var otherPartyKeyBlob = System.Convert.FromBase64String(OtherPublicKeyTextBox.Text);
+			var otherPartyKeyBlob = FromBase64(OtherPublicKeyTextBox.Text);
 			var otherPartyPublicKey = CngKey.Import(otherPartyKeyBlob, CngKeyBlobFormat.EccPublicBlob);
 			var symetricKey = ecdh.DeriveKeyMaterial(otherPartyPublicKey);
 			// Append random prefix.
@@ -150,7 +152,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			OtherDecryptedTextBox.Text = "Decrypting...";
 			try
 			{
-				var encryptedBytes = System.Convert.FromBase64String(OtherEncryptedDataTextBox.Text);
+				var encryptedBytes = FromBase64(OtherEncryptedDataTextBox.Text);
 				var decryptedBytes = Decrypt(encryptedBytes);
 				var decryptedData = System.Text.Encoding.UTF8.GetString(decryptedBytes);
 				// Display the decrypted data.
@@ -166,17 +168,16 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private byte[] Decrypt(byte[] dataBytes)
 		{
-			var keyBlob = System.Convert.FromBase64String(PrivateKeyTextBox.Text);
+			var keyBlob = FromBase64(PrivateKeyTextBox.Text);
 			var privateKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob);
 			var ecdh = new System.Security.Cryptography.ECDiffieHellmanCng(privateKey);
 
 			// Other key
-			var otherPartyKeyBlob = System.Convert.FromBase64String(OtherPublicKeyTextBox.Text);
+			var otherPartyKeyBlob = FromBase64(OtherPublicKeyTextBox.Text);
 			var otherPartyPublicKey = CngKey.Import(otherPartyKeyBlob, CngKeyBlobFormat.EccPublicBlob);
 
 			// Decrypt the passed byte array and specify OAEP padding.
 			var symetricKey = ecdh.DeriveKeyMaterial(otherPartyPublicKey);
-			var symetricKeyBase64 = ToBase64(symetricKey);
 
 			var decryptedBytes = Decrypt(symetricKey, dataBytes);
 			// Remove random prefix.
@@ -331,15 +332,38 @@ namespace JocysCom.Tools.E2EETool.Controls
 			Clipboard.SetText(EncryptedDataTextBox.Text, TextDataFormat.Text);
 		}
 
-		public static string ToBase64(byte[] bytes)
+		public static string ToBase64(byte[] bytes, Base64HeaderType headerType)
 		{
 			var s = Convert.ToBase64String(bytes);
 			s = InsertNewLines(s, 64);
+			if (headerType == Base64HeaderType.PublicKey && Global.AppSettings.AddBase64KeyHeaders)
+			{
+				s = "-----BEGIN EC PUBLIC KEY-----\r\n" + s + "\r\n-----END EC PUBLIC KEY-----\r\n";
+			}
+			if (headerType == Base64HeaderType.PrivateKey && Global.AppSettings.AddBase64KeyHeaders)
+			{
+				s = "-----BEGIN EC PRIVATE KEY-----\r\n" + s + "\r\n-----END EC PRIVATE KEY-----\r\n";
+			}
+			if (headerType == Base64HeaderType.Data && Global.AppSettings.AddBase64FileHeaders)
+			{
+				s = "-----BEGIN ENCRYPTED DATA-----\r\n" + s + "\r\n-----END ENCRYPTED DATA-----\r\n";
+			}
+			if (headerType == Base64HeaderType.Message && Global.AppSettings.AddBase64MessageHeaders)
+			{
+				s = "-----BEGIN ENCRYPTED MESSAGE-----\r\n" + s + "\r\n-----END ENCRYPTED MESSAGE-----\r\n";
+			}
 			return s;
 		}
 
 		public static byte[] FromBase64(string s)
 		{
+			// Remove headers.
+			var lines = s
+				.Split(new[] { '\r', '\n' })
+				.Where(x => !string.IsNullOrEmpty(x))
+				.Where(x => !x.StartsWith("-----"))
+				.ToArray();
+			s = string.Join("", lines);
 			return Convert.FromBase64String(s);
 		}
 
@@ -552,7 +576,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			// If must encrypt to Base64 then...
 			if (!decrypt && targetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
 			{
-				var encryptedBase64 = ToBase64(targetBytes);
+				var encryptedBase64 = ToBase64(targetBytes, Base64HeaderType.Data);
 				File.WriteAllText(targetPath, encryptedBase64);
 			}
 			else

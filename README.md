@@ -1,6 +1,6 @@
 # Jocys.com End-to-End Encryption Tool
 
-Protect and transmit sensitive information via unencrypted channels. Tools is using Elliptic Curve Diffie-Hellman (ECDH) key exchange (P-384 curve) and Advanced Encryption Standard (AES) 256-bit encryption algorithm.
+Protect and transmit sensitive information via unencrypted channels. Tool is using Elliptic Curve Diffie-Hellman (ECDH) key exchange (P-384 curve) and Advanced Encryption Standard (AES) 256-bit encryption algorithm.
 
 # Download
 

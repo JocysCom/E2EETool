@@ -973,4 +973,43 @@
 			</Canvas>
 		</Canvas>
 	</Viewbox>
+	<Viewbox
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		x:Key="Icon_speech_balloon"
+		x:Shared="False"
+		Stretch="Uniform"
+		Tag="SHA256_1783FBB203CDD410126DB8185F9FAF4F5BFA5AEBF148A8494E58E691920B0AA4">
+		<Canvas Width="512" Height="512">
+			<Canvas.RenderTransform>
+				<TranslateTransform X="0" Y="0" />
+			</Canvas.RenderTransform>
+			<Canvas.Resources>
+				<LinearGradientBrush xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Key="color-1" MappingMode="Absolute" StartPoint="0,0" EndPoint="384,368">
+					<LinearGradientBrush.GradientStops>
+						<GradientStopCollection>
+							<GradientStop Offset="0" Color="#77DA26" />
+							<GradientStop Offset="1" Color="#59A31D" />
+						</GradientStopCollection>
+					</LinearGradientBrush.GradientStops>
+				</LinearGradientBrush>
+			</Canvas.Resources>
+			<!--  Unknown tag: metadata  -->
+			<!--  Unknown tag: sodipodi:namedview  -->
+			<Canvas>
+				<Path
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					Fill="{StaticResource color-1}"
+					StrokeDashArray=""
+					StrokeEndLineCap="Flat"
+					StrokeLineJoin="Miter"
+					StrokeMiterLimit="10"
+					StrokeStartLineCap="Flat"
+					StrokeThickness="1">
+					<Path.Data>
+						<PathGeometry Figures="M296 512c8 -32 8 -80 -19.5 -104.5c-9 2.5 -18.5 5 -28.5 6c-110 16 -226.5 -46.5 -245 -158.5c-19 -113.5 59.5 -232.5 197 -252c140.5 -20 285 62 308.5 201.5c25 150 -80.5 272 -212.5 307.5z" FillRule="EvenOdd" />
+					</Path.Data>
+				</Path>
+			</Canvas>
+		</Canvas>
+	</Viewbox>
 </ResourceDictionary>

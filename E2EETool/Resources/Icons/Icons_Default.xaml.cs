@@ -22,6 +22,7 @@ namespace JocysCom.Tools.E2EETool.Resources.Icons
 		public const string Icon_information = nameof(Icon_information);
 		public const string Icon_key = nameof(Icon_key);
 		public const string Icon_lock = nameof(Icon_lock);
+		public const string Icon_speech_balloon = nameof(Icon_speech_balloon);
 
 	}
 }

@@ -2,6 +2,7 @@
 using System.Windows;
 using System;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace JocysCom.Tools.E2EETool
 {
@@ -23,6 +24,20 @@ namespace JocysCom.Tools.E2EETool
 				Global.AppData.Items.Add(new AppData());
 				Global.AppData.Save();
 			}
+			if (Global.AppSettings.AutoSettings == null)
+				Global.AppSettings.AutoSettings = new List<AppAutoSettings>();
+			if (Global.AppSettings.AutoSettings.Count == 0)
+			{
+				var autoSettings = new AppAutoSettings()
+				{
+					Title = "Skype",
+					MainPath = @"Document\Custom\Custom\Custom",
+					ChatPath = "Pane",
+					EditPath = "Edit",
+				};
+				Global.AppSettings.AutoSettings.Add(autoSettings);
+			}
+
 			Topmost = Global.AppSettings.AlwaysOnTop;
 			Global.AppSettings.PropertyChanged += AppSettings_PropertyChanged;
 			// Initialize.

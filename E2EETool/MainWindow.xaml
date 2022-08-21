@@ -32,6 +32,21 @@
 				</TabItem.Header>
 				<controls:MainControl x:Name="MainPanel" />
 			</TabItem>
+
+			<TabItem>
+				<TabItem.Header>
+					<StackPanel Orientation="Horizontal">
+						<ContentControl
+							Width="12"
+							Height="12"
+							VerticalAlignment="Center"
+							Content="{StaticResource Icon_speech_balloon}" />
+						<Label Padding="4,0,0,0" VerticalAlignment="Center" Content="Chat" />
+					</StackPanel>
+				</TabItem.Header>
+				<controls:ChatControl x:Name="ChatPanel" />
+			</TabItem>
+
 			<TabItem>
 				<TabItem.Header>
 					<StackPanel Orientation="Horizontal">

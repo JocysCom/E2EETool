@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using JocysCom.ClassLibrary.Controls;
-using static System.Net.Mime.MediaTypeNames;
 using System.Linq;
 
 namespace JocysCom.Tools.E2EETool.Controls
@@ -24,7 +23,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				return;
 			Global.AppSettings.PropertyChanged += AppSettings_PropertyChanged;
 			UpdateDataControls();
-			UpdateShowPrivateKey();
+			UpdateFromPropertyChanged(null, true);
 			_DelayTimer = new System.Timers.Timer(500);
 			_DelayTimer.AutoReset = false;
 			_DelayTimer.Elapsed += _DelayTimer_Elapsed;
@@ -63,8 +62,21 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void AppSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == nameof(AppData.ShowPrivateKey))
+			UpdateFromPropertyChanged(e.PropertyName);
+		}
+
+		private void UpdateFromPropertyChanged(string propertyName, bool all = false)
+		{
+			if (all || propertyName == nameof(AppData.ShowPrivateKey))
 				UpdateShowPrivateKey();
+			if (all || propertyName == nameof(AppData.ShowMessageButtons))
+			{
+				var visibility = Global.AppSettings.ShowMessageButtons
+					? Visibility.Visible
+					: Visibility.Collapsed;
+				EncryptButton.Visibility = visibility;
+				DecryptButton.Visibility = visibility;
+			}
 		}
 
 		public void GenerateKeys()

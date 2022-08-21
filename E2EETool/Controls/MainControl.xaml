@@ -34,7 +34,7 @@
 			Grid.Row="0"
 			Grid.Column="0"
 			Grid.ColumnSpan="4"
-			Margin="0,4,0,4"
+			Margin="0,0,0,4"
 			Padding="4"
 			Background="LightGray"
 			Text="Step 1: Exchange Encryption Keys" />
@@ -162,7 +162,7 @@
 			Grid.Row="5"
 			Grid.Column="0"
 			Grid.ColumnSpan="4"
-			Margin="0,4,0,4"
+			Margin="0,0,0,4"
 			Padding="4"
 			Background="LightGray"
 			Text="Step 2: Exchange Messages" />
@@ -173,7 +173,7 @@
 			Grid.Column="0"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Type plain text and encrypt" />
+			Text="Type your message" />
 		<Button
 			x:Name="EncryptButton"
 			Grid.Row="6"
@@ -209,7 +209,7 @@
 			Grid.Column="2"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Paste encrypted data from the other party" />
+			Text="Paste encrypted message from the other party" />
 		<Button
 			x:Name="PasteEncryptedDataPublicKeyButton"
 			Grid.Row="6"
@@ -246,7 +246,7 @@
 			Grid.Column="0"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Copy and send encrypted data to the other party" />
+			Text="Copy encrypted message and send it to the other party" />
 		<Button
 			x:Name="CopyEncryptedDataButton"
 			Grid.Row="8"
@@ -299,7 +299,7 @@
 			Grid.Column="2"
 			Padding="4,0,0,0"
 			VerticalAlignment="Center"
-			Text="Decrypted data from the other party" />
+			Text="Decrypted message from the other party" />
 		<TextBox
 			x:Name="OtherDecryptedTextBox"
 			Grid.Row="9"
@@ -321,7 +321,7 @@
 			Grid.Row="10"
 			Grid.Column="0"
 			Grid.ColumnSpan="4"
-			Margin="0,4,0,4"
+			Margin="0,0,0,4"
 			Padding="4"
 			Background="LightGray"
 			Text="Step 3: Exchange Files" />

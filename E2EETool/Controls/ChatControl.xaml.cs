@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MSAA;
 using System.Collections.Generic;
 using System.Windows;
+using System;
 
 namespace JocysCom.Tools.E2EETool.Controls
 {
@@ -165,7 +166,9 @@ namespace JocysCom.Tools.E2EETool.Controls
 				.OrderBy(x => x.Role).ThenBy(x => x.Name)
 				.ToArray();
 
-			GetChildrenAll(window, ref log);
+			//GetChildrenAll(window, ref log);
+
+			GetAll(window, false, 0, ref log, 11);
 
 			//var root = uiAutomation.GetRootElement();
 			//var processCondition = uiAutomation.CreatePropertyCondition(UIA_PropertyIds.UIA_ProcessIdPropertyId, _Process.Id);
@@ -256,73 +259,35 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 			*/
 
-			MessageBox.Show(log);
-
 		}
 
-
-		// Experiment.
-		void GetChildrenAll(MsaaItem ma, ref string log)
+		/// <summary>
+		/// Get all child controls.
+		/// </summary>
+		public IEnumerable<MsaaItem> GetAll(MsaaItem control, bool includeTop, int level, ref string log, int levelMax = int.MaxValue)
 		{
-			log = $"\r\n----- GetChildren\r\n" + log;
-
-			var children1 = GetChildren(ma, 0, ref log);
-			foreach (var child1 in children1)
+			if (control == null)
+				throw new ArgumentNullException(nameof(control));
+			// Create new list.
+			var controls = new List<MsaaItem>();
+			// Add top control if required.
+			if (includeTop && !controls.Contains(control))
+				controls.Add(control);
+			log += ToString(control, level);
+			if (level >= levelMax)
+				return controls;
+			// If control contains children then...
+			foreach (var child in control.Children)
 			{
-				var children2 = GetChildren(child1, 1, ref log);
-				foreach (var child2 in children2)
-				{
-					var children3 = GetChildren(child2, 2, ref log);
-					foreach (var child3 in children3)
-					{
-						var children4 = GetChildren(child3, 3, ref log);
-						foreach (var child4 in children4)
-						{
-							var children5 = GetChildren(child4, 4, ref log);
-							foreach (var child5 in children5)
-							{
-								var children6 = GetChildren(child5, 5, ref log);
-								foreach (var child6 in children6)
-								{
-									var children7 = GetChildren(child6, 6, ref log);
-									foreach (var child7 in children7)
-									{
-										var children8 = GetChildren(child7, 7, ref log);
-										foreach (var child8 in children8)
-										{
-											var children9 = GetChildren(child8, 8, ref log);
-											foreach (var child9 in children9)
-											{
-												var children10 = GetChildren(child9, 9, ref log);
-												foreach (var child10 in children10)
-												{
-													var children11 = GetChildren(child10, 10, ref log);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				var children = GetAll(child, true, level + 1, ref log, levelMax).Except(controls);
+				controls.AddRange(children);
 			}
-
-
-		}
-
-		public MsaaItem[] GetChildren(MsaaItem ma, int index, ref string log)
-		{
-			var children = Msaa.GetAccessibleChildren(ma)
-				.ToArray();
-			foreach (var child in children)
-				log = ToString(child, index) + log;
-			return children;
+			return controls;
 		}
 
 		string ToString(MsaaItem e, int index)
 		{
-			return $"{new string(' ', index * 2)}{e.Role} '{e.Name}': {e.Error?.Message}\r\n";
+			return $"{index}{new string(' ', index * 2)}{e.Role} '{e.Name}': {e.Error?.Message}\r\n";
 		}
 
 	}

@@ -44,6 +44,27 @@ namespace MSAA
 			return new MsaaItem(p, 0);
 		}
 
+		/// <summary>
+		/// Get all child controls.
+		/// </summary>
+		public static IEnumerable<MsaaItem> GetAll(MsaaItem control, bool includeTop = false)
+		{
+			if (control == null)
+				throw new ArgumentNullException(nameof(control));
+			// Create new list.
+			var controls = new List<MsaaItem>();
+			// Add top control if required.
+			if (includeTop && !controls.Contains(control))
+				controls.Add(control);
+			// If control contains children then...
+			foreach (var child in control.Children)
+			{
+				var children = GetAll(child, true);
+				controls.AddRange(children.Except(controls));
+			}
+			return controls;
+		}
+
 		public static MsaaItem ObjectToMsaaItem(IAccessible acc, object o)
 		{
 			return (o is int childId)

@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Accessibility;
+using System.Drawing;
 
 namespace MSAA
 {
@@ -33,6 +34,9 @@ namespace MSAA
 		[DllImport("oleacc.dll", PreserveSig = false)]
 		[return: MarshalAs(UnmanagedType.Interface)]
 		internal static extern object AccessibleObjectFromWindow(int hwnd, int dwId, ref Guid riid);
+
+		[DllImport("oleacc.dll")]
+		internal static extern IntPtr AccessibleObjectFromPoint(Point pt, [Out, MarshalAs(UnmanagedType.Interface)] out IAccessible accObj, [Out] out object ChildID);
 
 		/// <summary>
 		/// Retrieves the address of the specified interface for the object associated with the specified window.

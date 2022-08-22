@@ -5,9 +5,9 @@ using Accessibility;
 
 namespace MSAA
 {
-	public class MsaaAccessible
+	public class MsaaItem
 	{
-		public MsaaAccessible(IAccessible acc, int childId = 0)
+		public MsaaItem(IAccessible acc, int childId = 0)
 		{
 			_Accessible = acc;
 			_ChildId = childId;
@@ -153,6 +153,12 @@ namespace MSAA
 		{
 			return $"{Role} '{Name}': {Value}";
 		}
+
+		public MsaaItem Parent =>
+			Msaa.GetAccessibleParent(this);
+
+		public MsaaItem[] Children =>
+			Msaa.GetAccessibleChildren(this);
 
 	}
 }

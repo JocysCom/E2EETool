@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSAA;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace JocysCom.Tools.E2EETool.Controls
 {
@@ -67,13 +68,13 @@ namespace JocysCom.Tools.E2EETool.Controls
 		void RefreshPrograms()
 		{
 			var selection = ProgramsComboBox.SelectedItem as ComboBoxItem;
-			List<MsaaAccessible> windows = null;
+			List<MsaaItem> windows = null;
 			InfoPanel.AddTask(RefreshProgramsTaskName);
 			RefreshProgramsTask = Task.Run(() =>
 			{
 				windows = Msaa
 					.GetWindows(null, MsaaRole.Window)
-					.Select(x => new MsaaAccessible(x))
+					.Select(x => new MsaaItem(x))
 					.Where(x => !string.IsNullOrEmpty(x.Name))
 					.Where(x => x.IsVisible && x.IsEnabled)
 					.ToList();
@@ -144,13 +145,13 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void RefreshTree()
 		{
-			var window = default(MsaaAccessible);
+			var window = default(MsaaItem);
 			ControlsHelper.Invoke(() =>
 			{
 				var item = ProgramsComboBox.SelectedItem as ComboBoxItem;
 				if (item == null)
 					return;
-				window = (MsaaAccessible)item.Tag;
+				window = (MsaaItem)item.Tag;
 			});
 
 			// Pane 'Skype'\ Window 'Skype'\ Document 'Skype'\ Edit [AriaRole='textbox'
@@ -160,11 +161,9 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 			var all = Msaa
 				.GetWindows(null)
-				.Select(x => new MsaaAccessible(x))
+				.Select(x => new MsaaItem(x))
 				.OrderBy(x => x.Role).ThenBy(x => x.Name)
 				.ToArray();
-
-
 
 			GetChildrenAll(window, ref log);
 
@@ -257,11 +256,13 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 			*/
 
+			MessageBox.Show(log);
+
 		}
 
 
 		// Experiment.
-		void GetChildrenAll(MsaaAccessible ma, ref string log)
+		void GetChildrenAll(MsaaItem ma, ref string log)
 		{
 			log = $"\r\n----- GetChildren\r\n" + log;
 
@@ -310,7 +311,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		}
 
-		public MsaaAccessible[] GetChildren(MsaaAccessible ma, int index, ref string log)
+		public MsaaItem[] GetChildren(MsaaItem ma, int index, ref string log)
 		{
 			var children = Msaa.GetAccessibleChildren(ma)
 				.ToArray();
@@ -319,7 +320,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			return children;
 		}
 
-		string ToString(MsaaAccessible e, int index)
+		string ToString(MsaaItem e, int index)
 		{
 			return $"{new string(' ', index * 2)}{e.Role} '{e.Name}': {e.Error?.Message}\r\n";
 		}

@@ -5,8 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSAA;
 using System.Collections.Generic;
-using System.Windows;
 using System;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace JocysCom.Tools.E2EETool.Controls
 {
@@ -111,7 +112,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			{
 				var isBusy = InfoPanel.Tasks.Count > 0;
 				ProgramListRefreshButton.IsEnabled = !isBusy;
-				TestAutomationButton.IsEnabled = AutoSettings != null && !isBusy;
+				ShowXmlButton.IsEnabled = AutoSettings != null && !isBusy;
 			});
 		}
 
@@ -128,7 +129,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				return;
 		}
 
-		private void TestAutomationButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		private void ShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
 			InfoPanel.AddTask(RefreshAutomationTreeTaskName);
 			RefreshAutomationTreeTask = Task.Run(RefreshTree)
@@ -166,9 +167,11 @@ namespace JocysCom.Tools.E2EETool.Controls
 				.OrderBy(x => x.Role).ThenBy(x => x.Name)
 				.ToArray();
 
-			//GetChildrenAll(window, ref log);
-
 			GetAll(window, false, 0, ref log, 11);
+
+			_WindowXml = ToXml(window);
+
+			ShowMessage(_WindowXml.ToString());
 
 			//var root = uiAutomation.GetRootElement();
 			//var processCondition = uiAutomation.CreatePropertyCondition(UIA_PropertyIds.UIA_ProcessIdPropertyId, _Process.Id);
@@ -261,6 +264,21 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		}
 
+		XElement _WindowXml;
+		XElement _MainXml;
+		XElement _ChatXml;
+		XElement _EditXml;
+
+		public void ShowMessage(string message)
+		{
+			ControlsHelper.Invoke(() =>
+			{
+				var box = new MessageBoxWindow();
+				box.SetSize(800, 600);
+				box.ShowPrompt(message, "XML Text", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+			});
+		}
+
 		/// <summary>
 		/// Get all child controls.
 		/// </summary>
@@ -285,11 +303,32 @@ namespace JocysCom.Tools.E2EETool.Controls
 			return controls;
 		}
 
+
+		public static XElement ToXml(MsaaItem item)
+		{
+			var root = new XElement(item.Role.ToString());
+			root.SetAttributeValue(nameof(item.Name), item.Name);
+			root.SetAttributeValue(nameof(item.Value), item.Value);
+			root.SetAttributeValue(nameof(item.DefaultAction), item.DefaultAction);
+			root.SetAttributeValue(nameof(item.IsVisible), item.IsVisible);
+			root.SetAttributeValue(nameof(item.IsEnabled), item.IsEnabled);
+			foreach (var child in item.Children)
+				root.Add(ToXml(child));
+			return root;
+		}
+
 		string ToString(MsaaItem e, int index)
 		{
 			return $"{index}{new string(' ', index * 2)}{e.Role} '{e.Name}': {e.Error?.Message}\r\n";
 		}
 
+
+
+		private void MainPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			_MainXml = _WindowXml.XPathSelectElement(MainPathTextBox.Text);
+			ShowMessage(_MainXml?.ToString());
+		}
 	}
 
 }

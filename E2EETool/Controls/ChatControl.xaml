@@ -102,6 +102,7 @@
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<Label Grid.Row="0" Grid.Column="0" Content="Program" />
 				<ComboBox
@@ -119,12 +120,11 @@
 						Click="ProgramListRefreshButton_Click"
 						Content="Refresh" />
 					<Button
-						x:Name="TestAutomationButton"
+						x:Name="ShowXmlButton"
 						HorizontalAlignment="Left"
 						BorderThickness="0"
-						Click="TestAutomationButton_Click"
-						Content="Test" />
-
+						Click="ShowXmlButton_Click"
+						Content="Show XML" />
 				</StackPanel>
 				<Label Grid.Row="1" Grid.Column="0" Content="Main [Path]" />
 				<TextBox
@@ -135,6 +135,13 @@
 					HorizontalAlignment="Stretch"
 					BorderThickness="0"
 					Text="{Binding MainPath}" />
+				<Button
+					x:Name="MainPathShowXmlButton"
+					Grid.Row="1"
+					Grid.Column="3"
+					BorderThickness="0"
+					Click="MainPathShowXmlButton_Click"
+					Content="Show XML" />
 				<Label Grid.Row="2" Grid.Column="0" Content="Chat [Path]\[Name]" />
 				<TextBox
 					x:Name="ChatPathTextBox"

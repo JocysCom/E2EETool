@@ -119,30 +119,16 @@
 						BorderThickness="0"
 						Click="ProgramListRefreshButton_Click"
 						Content="Refresh" />
-					<Button
-						x:Name="ShowXmlButton"
-						HorizontalAlignment="Left"
-						BorderThickness="0"
-						Click="ShowXmlButton_Click"
-						Content="Show XML" />
 				</StackPanel>
-				<Label Grid.Row="1" Grid.Column="0" Content="Main [Path]" />
-				<TextBox
-					x:Name="MainPathTextBox"
-					Grid.Row="1"
-					Grid.Column="1"
-					Grid.ColumnSpan="2"
-					HorizontalAlignment="Stretch"
-					BorderThickness="0"
-					Text="{Binding MainPath}" />
 				<Button
-					x:Name="MainPathShowXmlButton"
-					Grid.Row="1"
+					x:Name="ShowXmlButton"
+					Grid.Row="0"
 					Grid.Column="3"
+					HorizontalAlignment="Left"
 					BorderThickness="0"
-					Click="MainPathShowXmlButton_Click"
+					Click="ShowXmlButton_Click"
 					Content="Show XML" />
-				<Label Grid.Row="2" Grid.Column="0" Content="Chat [Path]\[Name]" />
+				<Label Grid.Row="2" Grid.Column="0" Content="Chat XPath" />
 				<TextBox
 					x:Name="ChatPathTextBox"
 					Grid.Row="2"
@@ -151,7 +137,14 @@
 					HorizontalAlignment="Stretch"
 					BorderThickness="0"
 					Text="{Binding ChatPath}" />
-				<Label Grid.Row="3" Grid.Column="0" Content="Edit [Path]\[Name]" />
+				<Button
+					x:Name="ChatPathShowXmlButton"
+					Grid.Row="2"
+					Grid.Column="3"
+					BorderThickness="0"
+					Click="ChatPathShowXmlButton_Click"
+					Content="Show XML" />
+				<Label Grid.Row="3" Grid.Column="0" Content="Edit XPath" />
 				<TextBox
 					x:Name="EditPathTextBox"
 					Grid.Row="3"
@@ -160,6 +153,13 @@
 					HorizontalAlignment="Stretch"
 					BorderThickness="0"
 					Text="{Binding EditPath}" />
+				<Button
+					x:Name="EditPathShowXmlButton"
+					Grid.Row="3"
+					Grid.Column="3"
+					BorderThickness="0"
+					Click="EditPathShowXmlButton_Click"
+					Content="Show XML" />
 			</Grid>
 		</Border>
 		<local:DataListControl

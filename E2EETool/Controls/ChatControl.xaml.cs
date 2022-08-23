@@ -265,9 +265,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 		}
 
 		XElement _WindowXml;
-		XElement _MainXml;
-		XElement _ChatXml;
-		XElement _EditXml;
+		IEnumerable<XElement> _ChatXml;
+		IEnumerable<XElement> _EditXml;
 
 		public void ShowMessage(string message)
 		{
@@ -307,13 +306,19 @@ namespace JocysCom.Tools.E2EETool.Controls
 		public static XElement ToXml(MsaaItem item)
 		{
 			var root = new XElement(item.Role.ToString());
-			root.SetAttributeValue(nameof(item.Name), item.Name);
-			root.SetAttributeValue(nameof(item.Value), item.Value);
-			root.SetAttributeValue(nameof(item.DefaultAction), item.DefaultAction);
-			root.SetAttributeValue(nameof(item.IsVisible), item.IsVisible);
-			root.SetAttributeValue(nameof(item.IsEnabled), item.IsEnabled);
+			if (!string.IsNullOrEmpty(item.Name))
+				root.SetAttributeValue(nameof(item.Name), item.Name);
+			if (!string.IsNullOrEmpty(item.Value))
+				root.SetAttributeValue(nameof(item.Value), item.Value);
+			if (!string.IsNullOrEmpty(item.DefaultAction))
+				root.SetAttributeValue(nameof(item.DefaultAction), item.DefaultAction);
+			if (!item.IsVisible)
+				root.SetAttributeValue(nameof(item.IsVisible), item.IsVisible);
+			if (!item.IsEnabled)
+				root.SetAttributeValue(nameof(item.IsEnabled), item.IsEnabled);
 			foreach (var child in item.Children)
-				root.Add(ToXml(child));
+				if (child.IsVisible)
+					root.Add(ToXml(child));
 			return root;
 		}
 
@@ -322,12 +327,18 @@ namespace JocysCom.Tools.E2EETool.Controls
 			return $"{index}{new string(' ', index * 2)}{e.Role} '{e.Name}': {e.Error?.Message}\r\n";
 		}
 
-
-
-		private void MainPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		private void ChatPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-			_MainXml = _WindowXml.XPathSelectElement(MainPathTextBox.Text);
-			ShowMessage(_MainXml?.ToString());
+			_ChatXml = _WindowXml.XPathSelectElements(ChatPathTextBox.Text);
+			var xml = string.Join("\r\n", _ChatXml);
+			ShowMessage(xml);
+		}
+
+		private void EditPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			_EditXml = _WindowXml.XPathSelectElements(EditPathTextBox.Text);
+			var xml = string.Join("\r\n", _EditXml);
+			ShowMessage(xml);
 		}
 	}
 

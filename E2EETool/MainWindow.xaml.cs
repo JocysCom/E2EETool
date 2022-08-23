@@ -31,9 +31,8 @@ namespace JocysCom.Tools.E2EETool
 				var autoSettings = new AppAutoSettings()
 				{
 					Title = "Skype",
-					MainPath = @"//Document[@Name=""Skype""]",
-					ChatPath = "Pane",
-					EditPath = "Edit",
+					ChatPath = "//Document[@Name=\"Skype\"]//Pane",
+					EditPath = "//Text[@Name=\"Type a message\"]",
 				};
 				Global.AppSettings.AutoSettings.Add(autoSettings);
 			}

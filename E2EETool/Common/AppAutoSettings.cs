@@ -10,9 +10,6 @@ namespace JocysCom.Tools.E2EETool
 		public string Title { get => _Title; set => SetProperty(ref _Title, value); }
 		private string _Title;
 
-		public string MainPath { get => _MainPath; set => SetProperty(ref _MainPath, value); }
-		private string _MainPath;
-
 		public string ChatPath { get => _ChatPath; set => SetProperty(ref _ChatPath, value); }
 		private string _ChatPath;
 		

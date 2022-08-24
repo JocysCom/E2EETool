@@ -11,7 +11,7 @@ namespace MSAA
 		{
 			_Accessible = acc;
 			_ChildId = childId;
-			SetAccessible(acc);
+			Refresh();
 		}
 
 		public IAccessible Accessible => _Accessible;
@@ -46,22 +46,21 @@ namespace MSAA
 		public string DefaultAction => _DefaultAction;
 		string _DefaultAction;
 
-		public void Refresh()
-		{
-			SetAccessible(_Accessible);
-		}
-
 		public bool IsValid => _IsValid;
 		bool _IsValid;
 
 		public Exception Error => _Error;
 		Exception _Error;
 
-
+		// Depending on role some properties are not available.
+		// Use lists to cash these roles and crash less.
 		public static List<MsaaRole> NoDefaultAction = new List<MsaaRole>();
+		public static List<MsaaRole> NoRole = new List<MsaaRole>();
+		public static List<MsaaRole> NoName = new List<MsaaRole>();
 		public static List<MsaaRole> NoValue = new List<MsaaRole>();
+		public static List<MsaaRole> NoState = new List<MsaaRole>();
 
-		private void SetAccessible(IAccessible acc)
+		public void Refresh()
 		{
 			_IsValid = false;
 			_Name = string.Empty;
@@ -73,68 +72,40 @@ namespace MSAA
 			_DefaultAction = string.Empty;
 			if (_Accessible == null || _Accessible == default(IAccessible))
 				return;
-			try
-			{
-				_Role = (MsaaRole)Convert.ToUInt32(acc.accRole[_ChildId]);
-			}
-			catch (Exception ex)
-			{
-				_Error = ex;
-				return;
-			}
 			if (ChildId > 0)
-				_Accessible = acc.accChild[ChildId] as IAccessible;
-			if (acc != null)
-				_Handle = Msaa.WindowFromAccessibleObject(acc);
+				_Accessible = _Accessible.accChild[ChildId] as IAccessible;
+			if (_Accessible != null)
+				_Handle = Msaa.WindowFromAccessibleObject(_Accessible);
+			TrySetValue(() => _Name = _Accessible.accName[_ChildId], NoName);
+			TrySetValue(() => _Value = _Accessible.accValue[_ChildId], NoValue);
+			TrySetValue(() => _Role = (MsaaRole)Convert.ToUInt32(_Accessible.accRole[_ChildId]), NoRole);
+			TrySetValue(() => _State = (MsaaState)Convert.ToUInt32(_Accessible.accState[_ChildId]), NoState);
+			TrySetValue(() => _DefaultAction = _Accessible.accDefaultAction[_ChildId], NoDefaultAction);
+			SetLocation(_Accessible);
+			_IsValid = true;
+		}
+
+		public void TrySetValue(Action action, List<MsaaRole> excludeList)
+		{
 			try
 			{
-				_Name = acc.accName[_ChildId];
-			}
-			catch (Exception ex)
-			{
-				_Error = ex;
-			}
-			try
-			{
-				if (!NoValue.Contains(Role))
-					_Value = acc.accValue[_ChildId];
+				if (!excludeList.Contains(Role))
+					action.Invoke();
 			}
 			catch (Exception ex)
 			{
 				// DISP_E_MEMBERNOTFOUND
 				if ((uint)ex.HResult == 0x80020003)
 				{
-					lock (NoValue)
-						if (!NoValue.Contains(Role))
-							NoValue.Add(Role);
+					lock (excludeList)
+						if (!excludeList.Contains(Role))
+							excludeList.Add(Role);
 				}
 				else
 				{
 					throw;
 				}
 			}
-			_State = (MsaaState)Convert.ToUInt32(acc.accState[_ChildId]);
-			try
-			{
-				if (!NoDefaultAction.Contains(Role))
-					_DefaultAction = acc.accDefaultAction[_ChildId];
-			}
-			catch (Exception daEx)
-			{
-				// DISP_E_MEMBERNOTFOUND
-				if ((uint)daEx.HResult == 0x80020003)
-				{
-					lock (NoDefaultAction)
-						if (!NoDefaultAction.Contains(Role))
-							NoDefaultAction.Add(Role);
-				}
-				else
-				{
-					throw;
-				}
-			}
-			SetLocation(acc);
-			_IsValid = true;
 		}
 
 		private void SetLocation(IAccessible acc)

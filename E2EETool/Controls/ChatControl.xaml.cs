@@ -39,7 +39,9 @@ namespace JocysCom.Tools.E2EETool.Controls
 			{
 				if (!string.IsNullOrEmpty(DataTextBox.Text))
 				{
-					DataListPanel.AddMessage("Out", DataTextBox.Text.TrimEnd('\r', '\n'));
+					var message = DataTextBox.Text.TrimEnd('\r', '\n');
+					DataListPanel.AddMessage("Out", message);
+					SendMessage(message);
 					DataTextBox.Text = string.Empty;
 					ControlsHelper.AutoScroll(this);
 				}
@@ -143,8 +145,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 				});
 		}
 
-		// IAutomation uiAutomation { get; } = new CUIAutomation8();
-
 		private void RefreshTree()
 		{
 			var window = default(MsaaItem);
@@ -172,95 +172,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 			_WindowXml = ToXml(window);
 
 			ShowMessage(_WindowXml.ToString());
-
-			//var root = uiAutomation.GetRootElement();
-			//var processCondition = uiAutomation.CreatePropertyCondition(UIA_PropertyIds.UIA_ProcessIdPropertyId, _Process.Id);
-			//var processElement = root.FindFirst(TreeScope.TreeScope_Element | TreeScope.TreeScope_Children, processCondition);
-
-			//var processType = processElement.CurrentControlType;
-			//var processName = processElement.CurrentName;
-
-			/*
-			var condition = new PropertyCondition(AutomationElement.ProcessIdProperty, _Process.Id);
-			var rootElement = AutomationElement.RootElement.FindFirst(TreeScope.Element | TreeScope.Children, condition);
-
-			var rootText = AutomationHelper.GetAnyText(rootElement);
-
-			AutomationElement parentAutomationElement = AutomationElement.FromHandle(_Process.MainWindowHandle);
-			*/
-
-			/*
-
-
-			log = $"\r\n----- Process {_Process.Id}\r\n" + log;
-
-			var mainTypes = AutomationHelper.ParsePath(AutoSettings.MainPath).Select(x => x.Id).ToArray();
-
-			var chatTypes = AutomationHelper.ParsePath(AutoSettings.ChatPath);
-			var chatTypesPath = chatTypes.Take(chatTypes.Count - 1).Select(x => x.Id).ToArray();
-			var chatTypesName = chatTypes.Last();
-
-			var editTypes = AutomationHelper.ParsePath(AutoSettings.EditPath);
-			var editTypesPath = editTypes.Take(editTypes.Count - 1).Select(x => x.Id).ToArray();
-			var editTypesName = editTypes.Last();
-
-
-			var mainPanel = GetFirstByTypes(processElement, 1, ref log, mainTypes);
-
-			var allSub = GetAllSubChildren(processElement, 1, ref log);
-
-			var raw = uiAutomation.RawViewWalker;
-
-			//IUIAutomation.RawViewWalker to get an IUIAutomationTreeWalker
-
-
-			// Get panel which contains chat messages.
-			var chatPanel = chatTypesPath.Length > 0
-				? GetFirstByTypes(mainPanel, 1, ref log, chatTypesPath)
-				: mainPanel;
-			// Get panel which contains edit box for sending a message.
-			var editPanel = editTypesPath.Length > 0
-				? GetFirstByTypes(mainPanel, 1, ref log, editTypesPath)
-				: mainPanel;
-
-			GetChildrenAll(processElement, ref log);
-			*/
-			/*
-
-			var mainPanel = GetFirstByTypes(rootElement, 1, ref log, mainTypes);
-			// Get panel which contains chat messages.
-			var chatPanel = chatTypesPath.Length > 0
-				? GetFirstByTypes(mainPanel, 1, ref log, chatTypesPath)
-				: mainPanel;
-			// Get panel which contains edit box for sending a message.
-			var editPanel = editTypesPath.Length > 0
-				? GetFirstByTypes(mainPanel, 1, ref log, editTypesPath)
-				: mainPanel;
-
-			//log = "----- EditChildren\r\n" + log;
-			//var editChildren = GetChildren(editPanel, 1, ref log, editTypesName);
-			//log = "----- ChatChildren\r\n" + log;
-			//var chatChildren = GetChildren(chatPanel, 1, ref log, chatTypesName);
-
-			log = "----- GetCharChildren\r\n" + log;
-
-			var walker = TreeWalker.ControlViewWalker;
-
-			var chatChildren = GetChildren(chatPanel, 0, ref log, ControlType.Pane);
-			foreach (var chatChild in chatChildren)
-			{
-				//var chatChildren2 = GetChildren(chatChild, 1, ref log);
-
-				walker.GetLastChild(chatChild);
-				//AutomationHelper.FindChildrenRaw(chatChild);
-				log = ToString(chatChild, 2) + log;
-				//foreach (var child2 in chatChildren2)
-				//{
-				//	//log = ToString(child2, 4) + log;
-				//}
-			}
-
-			*/
 
 		}
 
@@ -302,7 +213,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 			return controls;
 		}
 
-
 		public static XElement ToXml(MsaaItem item)
 		{
 			var root = new XElement(item.Role.ToString());
@@ -340,6 +250,17 @@ namespace JocysCom.Tools.E2EETool.Controls
 			var xml = string.Join("\r\n", _EditXml);
 			ShowMessage(xml);
 		}
+
+		private void SendMessage(string message)
+		{
+
+		}
+
+		private void CheckForNewMessages()
+		{
+
+		}
+
 	}
 
 }

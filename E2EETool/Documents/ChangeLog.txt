@@ -1,3 +1,7 @@
+2022-08-25 v1.1.7:
+- New: Release build
+- Update: Interface updated.
+
 2022-04-06 v1.1.6:
 - New: Added new options.
 - New: File encryption and decryption.

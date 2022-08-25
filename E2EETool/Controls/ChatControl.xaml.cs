@@ -56,7 +56,10 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
 		{
-			RefreshPrograms();
+			if (ControlsHelper.IsDesignMode(this))
+				return;
+			// Commented future feature.
+			//RefreshPrograms();
 		}
 
 		private void ProgramListRefreshButton_Click(object sender, System.Windows.RoutedEventArgs e)

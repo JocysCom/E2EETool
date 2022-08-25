@@ -4,7 +4,7 @@ Protect and transmit sensitive information via unencrypted channels. Tool is usi
 
 # Download
 
-Digitally Signed Application v1.1.6 (2022-08-14)
+Digitally Signed Application v1.1.7 (2022-08-25)
 
 [Download - JocysCom.E2EETool.zip](https://github.com/JocysCom/E2EETool/releases/download/1.0.0/JocysCom.Tools.E2EETool.zip)
 

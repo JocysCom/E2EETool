@@ -33,7 +33,7 @@
 				<controls:MainControl x:Name="MainPanel" />
 			</TabItem>
 
-			<TabItem Visibility="Collapsed">
+			<TabItem>
 				<TabItem.Header>
 					<StackPanel Orientation="Horizontal">
 						<ContentControl

@@ -170,15 +170,17 @@ namespace JocysCom.Tools.E2EETool.Controls
 				.OrderBy(x => x.Role).ThenBy(x => x.Name)
 				.ToArray();
 
-			GetAll(window, false, 0, ref log, 11);
+			var allItems = GetAll(window, false, 0, ref log, 11);
 
-			_WindowXml = ToXml(window);
+			_WindowItems.Clear();
+			_WindowXml = ToXml(window, ref _WindowItems);
 
 			ShowMessage(_WindowXml.ToString());
 
 		}
 
 		XElement _WindowXml;
+		List<MsaaItem> _WindowItems = new List<MsaaItem>();
 		IEnumerable<XElement> _ChatXml;
 		IEnumerable<XElement> _EditXml;
 
@@ -195,7 +197,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 		/// <summary>
 		/// Get all child controls.
 		/// </summary>
-		public IEnumerable<MsaaItem> GetAll(MsaaItem control, bool includeTop, int level, ref string log, int levelMax = int.MaxValue)
+		public List<MsaaItem> GetAll(MsaaItem control, bool includeTop, int level, ref string log, int levelMax = int.MaxValue)
 		{
 			if (control == null)
 				throw new ArgumentNullException(nameof(control));
@@ -216,7 +218,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			return controls;
 		}
 
-		public static XElement ToXml(MsaaItem item)
+		public static XElement ToXml(MsaaItem item, ref List<MsaaItem> items)
 		{
 			var root = new XElement(item.Role.ToString());
 			if (!string.IsNullOrEmpty(item.Name))
@@ -229,9 +231,14 @@ namespace JocysCom.Tools.E2EETool.Controls
 				root.SetAttributeValue(nameof(item.IsVisible), item.IsVisible);
 			if (!item.IsEnabled)
 				root.SetAttributeValue(nameof(item.IsEnabled), item.IsEnabled);
+			// Id which will be used to find original MsaaItem.
+			item.Id = items.Count;
+			items.Add(item);
+			root.SetAttributeValue(nameof(item.Id), item.Id);
+			// Loop trough children.
 			foreach (var child in item.Children)
 				if (child.IsVisible)
-					root.Add(ToXml(child));
+					root.Add(ToXml(child, ref items));
 			return root;
 		}
 

@@ -14,6 +14,11 @@ namespace MSAA
 			Refresh();
 		}
 
+		/// <summary>
+		/// Manually set ID. Used to find this object by Id in XML.
+		/// </summary>
+		public int Id { get; set; }
+
 		public IAccessible Accessible => _Accessible;
 		IAccessible _Accessible;
 
@@ -73,7 +78,13 @@ namespace MSAA
 			if (_Accessible == null || _Accessible == default(IAccessible))
 				return;
 			if (ChildId > 0)
-				_Accessible = _Accessible.accChild[ChildId] as IAccessible;
+			{
+				var accChild = _Accessible.accChild[ChildId] as IAccessible;
+				if (accChild != null)
+				{
+					_Accessible = accChild;
+				}
+			}
 			if (_Accessible != null)
 				_Handle = Msaa.WindowFromAccessibleObject(_Accessible);
 			TrySetValue(() => _Name = _Accessible.accName[_ChildId], NoName);

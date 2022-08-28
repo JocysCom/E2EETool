@@ -54,9 +54,6 @@ namespace MSAA
 		public bool IsValid => _IsValid;
 		bool _IsValid;
 
-		public Exception Error => _Error;
-		Exception _Error;
-
 		// Depending on role some properties are not available.
 		// Use lists to cash these roles and crash less.
 		public static List<MsaaRole> NoDefaultAction = new List<MsaaRole>();
@@ -96,7 +93,17 @@ namespace MSAA
 			_IsValid = true;
 		}
 
-		public void TrySetValue(Action action, List<MsaaRole> excludeList)
+		public void SetValue(string value)
+		{
+			_Accessible.accValue[_ChildId] = value;
+		}
+
+		public void SetName(string value)
+		{
+			_Accessible.accName[_ChildId] = value;
+		}
+
+		private void TrySetValue(Action action, List<MsaaRole> excludeList)
 		{
 			try
 			{

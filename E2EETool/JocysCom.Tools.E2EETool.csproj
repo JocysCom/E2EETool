@@ -38,6 +38,10 @@
   <ItemGroup>
     <Resource Include="App.ico" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="JocysCom\Processes\" />
+  </ItemGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="IF NOT EXIST &quot;$(ProjectDir)Resources&quot; MKDIR &quot;$(ProjectDir)Resources&quot; 2&gt;nul&#xD;&#xA;PowerShell.exe -Command &quot;(Get-Date).ToString('o') | Out-File '$(ProjectDir)Resources\BuildDate.txt'&quot;&#xD;&#xA;" />
 	</Target>

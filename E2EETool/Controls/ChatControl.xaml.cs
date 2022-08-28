@@ -5,9 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSAA;
 using System.Collections.Generic;
-using System;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using System.Diagnostics;
+using JocysCom.ClassLibrary.Processes;
 
 namespace JocysCom.Tools.E2EETool.Controls
 {
@@ -35,7 +36,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void DataTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter && !Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift))
+			if (e.Key == Key.Enter && !System.Windows.Input.Keyboard.IsKeyDown(Key.LeftShift) && !System.Windows.Input.Keyboard.IsKeyDown(Key.RightShift))
 			{
 				if (!string.IsNullOrEmpty(DataTextBox.Text))
 				{
@@ -144,6 +145,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 					{
 						InfoPanel.RemoveTask(RefreshAutomationTreeTaskName);
 						RefreshAutomationTreeTask = null;
+						ShowMessage(_WindowXml.ToString());
 					});
 				});
 		}
@@ -162,25 +164,29 @@ namespace JocysCom.Tools.E2EETool.Controls
 			// Pane 'Skype'\ Window 'Skype'\ Document 'Skype'\ Edit [AriaRole='textbox'
 			var name = window.Name;
 
-			var log = "";
-
 			var all = Msaa
 				.GetWindows(null)
 				.Select(x => new MsaaItem(x))
 				.OrderBy(x => x.Role).ThenBy(x => x.Name)
 				.ToArray();
 
-			var allItems = GetAll(window, false, 0, ref log, 11);
+			//var allItems = GetAll(window, false, 0, ref log, 11);
 
 			_WindowItems.Clear();
 			_WindowXml = ToXml(window, ref _WindowItems);
-
-			ShowMessage(_WindowXml.ToString());
-
 		}
 
+		/// <summary>
+		/// All Program window elements as XML.
+		/// </summary>
 		XElement _WindowXml;
+
+		/// <summary>
+		/// All Program window elements as MsaaItem.
+		/// List is used to find original MsaaItem by "Id".
+		/// </summary>
 		List<MsaaItem> _WindowItems = new List<MsaaItem>();
+
 		IEnumerable<XElement> _ChatXml;
 		IEnumerable<XElement> _EditXml;
 
@@ -194,6 +200,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			});
 		}
 
+		/*
 		/// <summary>
 		/// Get all child controls.
 		/// </summary>
@@ -217,6 +224,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			}
 			return controls;
 		}
+		*/
 
 		public static XElement ToXml(MsaaItem item, ref List<MsaaItem> items)
 		{
@@ -242,11 +250,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 			return root;
 		}
 
-		string ToString(MsaaItem e, int index)
-		{
-			return $"{index}{new string(' ', index * 2)}{e.Role} '{e.Name}': {e.Error?.Message}\r\n";
-		}
-
 		private void ChatPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
 			_ChatXml = _WindowXml.XPathSelectElements(ChatPathTextBox.Text);
@@ -261,14 +264,30 @@ namespace JocysCom.Tools.E2EETool.Controls
 			ShowMessage(xml);
 		}
 
+		// https://github.com/EasyAsABC123/Keyboard
+
 		private void SendMessage(string message)
 		{
+			_EditXml = _WindowXml.XPathSelectElements(EditPathTextBox.Text);
+			var textBox = _EditXml.FirstOrDefault();
+			if (textBox == null)
+				return;
+			var id = int.Parse(textBox.Attribute(nameof(MsaaItem.Id)).Value);
+			var item = _WindowItems.FirstOrDefault(x => x.Id == id);
+			//item.SetValue(message+"\r\n");
+			//item.SetName(message);
+			var proc = Process.GetProcessesByName("Skype").Where(x => x.MainWindowTitle == "Skype").FirstOrDefault();
 
-		}
+			Task.Run(() =>
+			{
+				KeyboardHelper.Send(Key.T, Key.E)
 
-		private void CheckForNewMessages()
-		{
-
+				KeyboardHelper.SendTextMessage(
+					message, false,
+					Process.GetCurrentProcess().MainWindowHandle,
+					proc.MainWindowHandle
+				);
+			});
 		}
 
 	}

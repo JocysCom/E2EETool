@@ -23,7 +23,20 @@ namespace JocysCom.Tools.E2EETool.Controls
 			if (ControlsHelper.IsDesignMode(this))
 				return;
 			UpdateControlButtons();
+			DataTextBox_TextChanged(null, null);
 			InfoPanel.Tasks.ListChanged += Tasks_ListChanged;
+			MainWindow.Current.MainTab.SelectionChanged += MainTab_SelectionChanged;
+		}
+
+		private void MainTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (MainWindow.Current.IsChatSelected)
+			{
+				var isBusy = InfoPanel.Tasks.Count > 0;
+				// Refresh programs combobox if program is not busy.
+				if (!isBusy)
+					RefreshPrograms();
+			}
 		}
 
 		private void Tasks_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
@@ -52,7 +65,10 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void ConnectButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-
+			// If your keys are missing then generate new ones.
+			if (Global.AppSettings.YourPublicKey == null || Global.AppSettings.YourPrivateKey == null)
+				Security.GenerateKeys();
+			SendMessage(Global.AppSettings.YourPublicKey);
 		}
 
 		private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
@@ -127,8 +143,10 @@ namespace JocysCom.Tools.E2EETool.Controls
 			var item = ProgramsComboBox.SelectedItem as ComboBoxItem;
 			if (item == null)
 				return;
+			var title = (string)item.Content;
+			_Process = Process.GetProcesses().Where(x => x.MainWindowTitle == title).FirstOrDefault();
 			// Try to load automation settings.
-			AutoSettings = Global.AppSettings.AutoSettings.FirstOrDefault(x => (string)item.Content == x.Title);
+			AutoSettings = Global.AppSettings.AutoSettings.FirstOrDefault(x => x.Title == title);
 			AutoSettingsGrid.DataContext = AutoSettings;
 			// If Automation settings not found then exit.
 			if (AutoSettings == null)
@@ -176,6 +194,9 @@ namespace JocysCom.Tools.E2EETool.Controls
 			_WindowXml = ToXml(window, ref _WindowItems);
 		}
 
+		Process _Process;
+		Process _CurrentProcess => Process.GetCurrentProcess();
+
 		/// <summary>
 		/// All Program window elements as XML.
 		/// </summary>
@@ -188,7 +209,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 		List<MsaaItem> _WindowItems = new List<MsaaItem>();
 
 		IEnumerable<XElement> _ChatXml;
-		IEnumerable<XElement> _EditXml;
 
 		public void ShowMessage(string message)
 		{
@@ -199,32 +219,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 				box.ShowPrompt(message, "XML Text", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 			});
 		}
-
-		/*
-		/// <summary>
-		/// Get all child controls.
-		/// </summary>
-		public List<MsaaItem> GetAll(MsaaItem control, bool includeTop, int level, ref string log, int levelMax = int.MaxValue)
-		{
-			if (control == null)
-				throw new ArgumentNullException(nameof(control));
-			// Create new list.
-			var controls = new List<MsaaItem>();
-			// Add top control if required.
-			if (includeTop && !controls.Contains(control))
-				controls.Add(control);
-			log += ToString(control, level);
-			if (level >= levelMax)
-				return controls;
-			// If control contains children then...
-			foreach (var child in control.Children)
-			{
-				var children = GetAll(child, true, level + 1, ref log, levelMax).Except(controls);
-				controls.AddRange(children);
-			}
-			return controls;
-		}
-		*/
 
 		public static XElement ToXml(MsaaItem item, ref List<MsaaItem> items)
 		{
@@ -252,44 +246,40 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void ChatPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-			_ChatXml = _WindowXml.XPathSelectElements(ChatPathTextBox.Text);
-			var xml = string.Join("\r\n", _ChatXml);
+			var xml = "";
+			try
+			{
+				_ChatXml = _WindowXml.XPathSelectElements(ChatPathTextBox.Text);
+				xml = string.Join("\r\n", _ChatXml);
+			}
+			catch (System.Exception ex)
+			{
+				xml = ex.Message;
+			}
 			ShowMessage(xml);
 		}
-
-		private void EditPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
-		{
-			_EditXml = _WindowXml.XPathSelectElements(EditPathTextBox.Text);
-			var xml = string.Join("\r\n", _EditXml);
-			ShowMessage(xml);
-		}
-
-		// https://github.com/EasyAsABC123/Keyboard
 
 		private void SendMessage(string message)
 		{
-			_EditXml = _WindowXml.XPathSelectElements(EditPathTextBox.Text);
-			var textBox = _EditXml.FirstOrDefault();
-			if (textBox == null)
-				return;
-			var id = int.Parse(textBox.Attribute(nameof(MsaaItem.Id)).Value);
-			var item = _WindowItems.FirstOrDefault(x => x.Id == id);
-			//item.SetValue(message+"\r\n");
-			//item.SetName(message);
-			var proc = Process.GetProcessesByName("Skype").Where(x => x.MainWindowTitle == "Skype").FirstOrDefault();
-
 			Task.Run(() =>
 			{
-				KeyboardHelper.Send(Key.T, Key.E)
-
 				KeyboardHelper.SendTextMessage(
-					message, false,
-					Process.GetCurrentProcess().MainWindowHandle,
-					proc.MainWindowHandle
+					message, true,
+					_Process.MainWindowHandle,
+					_CurrentProcess.MainWindowHandle
 				);
 			});
 		}
 
+		private void SendButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+
+		}
+
+		private void DataTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			SendButton.Opacity = string.IsNullOrEmpty(DataTextBox.Text) ? 0.5 : 1.0;
+		}
 	}
 
 }

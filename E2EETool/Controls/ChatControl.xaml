@@ -81,11 +81,13 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" />
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
+		<!--  ToolBar with Options  -->
 		<Border
 			Grid.Row="0"
 			Grid.ColumnSpan="2"
@@ -93,7 +95,6 @@
 			BorderThickness="0,0,0,1">
 			<Grid x:Name="AutoSettingsGrid" Margin="0,2,1,2">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
@@ -119,6 +120,12 @@
 						BorderThickness="0"
 						Click="ProgramListRefreshButton_Click"
 						Content="Refresh" />
+					<Button
+						x:Name="ConnectButton"
+						HorizontalAlignment="Left"
+						BorderThickness="0"
+						Click="ConnectButton_Click"
+						Content="Connect" />
 				</StackPanel>
 				<Button
 					x:Name="ShowXmlButton"
@@ -144,29 +151,48 @@
 					BorderThickness="0"
 					Click="ChatPathShowXmlButton_Click"
 					Content="Show XML" />
-				<Label Grid.Row="3" Grid.Column="0" Content="Edit XPath" />
-				<TextBox
-					x:Name="EditPathTextBox"
-					Grid.Row="3"
-					Grid.Column="1"
-					Grid.ColumnSpan="2"
-					HorizontalAlignment="Stretch"
-					BorderThickness="0"
-					Text="{Binding EditPath}" />
-				<Button
-					x:Name="EditPathShowXmlButton"
-					Grid.Row="3"
-					Grid.Column="3"
-					BorderThickness="0"
-					Click="EditPathShowXmlButton_Click"
-					Content="Show XML" />
 			</Grid>
 		</Border>
+		<!--  Messages  -->
 		<local:DataListControl
 			x:Name="DataListPanel"
 			Grid.Row="1"
 			Grid.Column="0"
 			Grid.ColumnSpan="2" />
+		<!--  Status Panel  -->
+		<StackPanel
+			Grid.Row="3"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			Background="{DynamicResource {x:Static SystemColors.ControlBrush}}">
+			<Border
+				Grid.Row="0"
+				Grid.ColumnSpan="2"
+				BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+				BorderThickness="0,1,0,0">
+
+				<StackPanel Opacity="0.50" Orientation="Horizontal">
+					<Label Content="Status:" Style="{StaticResource ButtonLabel}" />
+					<StackPanel Style="{StaticResource ButtonStackPanel}">
+						<ContentControl x:Name="ProgramStatusUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />
+						<Label Content="Target Program" Style="{StaticResource ButtonLabel}" />
+					</StackPanel>
+					<StackPanel Style="{StaticResource ButtonStackPanel}">
+						<ContentControl x:Name="YourPrivateKeyUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />
+						<Label Content="Your Private Key" Style="{StaticResource ButtonLabel}" />
+					</StackPanel>
+					<StackPanel Style="{StaticResource ButtonStackPanel}">
+						<ContentControl x:Name="YourPublicKeyUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />
+						<Label Content="Your Public Key" Style="{StaticResource ButtonLabel}" />
+					</StackPanel>
+					<StackPanel Style="{StaticResource ButtonStackPanel}">
+						<ContentControl x:Name="OtherPublicKeyUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />
+						<Label Content="Other Public Key" Style="{StaticResource ButtonLabel}" />
+					</StackPanel>
+				</StackPanel>
+			</Border>
+		</StackPanel>
+		<!--  Send Message  -->
 		<StackPanel Grid.Row="2" Grid.Column="0" Background="White">
 			<Border
 				Margin="4"
@@ -189,6 +215,7 @@
 						ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 						ScrollViewer.VerticalScrollBarVisibility="Auto"
 						Text="{Binding Text}"
+						TextChanged="DataTextBox_TextChanged"
 						TextWrapping="Wrap" />
 					<TextBlock
 						Margin="0"
@@ -220,13 +247,13 @@
 		</StackPanel>
 		<StackPanel Grid.Row="2" Grid.Column="1" Background="White">
 			<Button
-				x:Name="ConnectButton"
-				Width="100"
+				x:Name="SendButton"
+				Width="85"
 				Margin="0,4,4,4"
 				Padding="12"
 				Background="Transparent"
-				Click="ConnectButton_Click"
-				Content="Connect"
+				Click="SendButton_Click"
+				Content="Send"
 				Style="{DynamicResource RoundCorner}" />
 		</StackPanel>
 	</Grid>

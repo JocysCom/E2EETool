@@ -32,7 +32,6 @@ namespace JocysCom.Tools.E2EETool
 				{
 					Title = "Skype",
 					ChatPath = "//Document[@Name=\"Skype\"]//Pane",
-					EditPath = "//Text[@Name=\"Type a message\"]",
 				};
 				Global.AppSettings.AutoSettings.Add(autoSettings);
 			}
@@ -75,6 +74,8 @@ namespace JocysCom.Tools.E2EETool
 			Global.AppData.Save();
 		}
 
+		public bool IsChatSelected =>
+			MainTab.SelectedItem == ChatTabItem;
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{

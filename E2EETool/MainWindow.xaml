@@ -18,7 +18,11 @@
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 		<JcControls:InfoControl x:Name="InfoPanel" Grid.Row="0" RightIconContent="{StaticResource Icon_lock}" />
-		<TabControl Grid.Row="1" Margin="4">
+		<TabControl
+			x:Name="MainTab"
+			Grid.Row="1"
+			Margin="4"
+			x:FieldModifier="public">
 			<TabItem>
 				<TabItem.Header>
 					<StackPanel Orientation="Horizontal">
@@ -33,7 +37,7 @@
 				<controls:MainControl x:Name="MainPanel" />
 			</TabItem>
 
-			<TabItem>
+			<TabItem x:Name="ChatTabItem">
 				<TabItem.Header>
 					<StackPanel Orientation="Horizontal">
 						<ContentControl

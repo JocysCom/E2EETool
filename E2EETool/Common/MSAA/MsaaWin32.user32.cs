@@ -32,6 +32,9 @@ namespace MSAA
 		[DllImport("user32.dll", SetLastError = true)]
 		internal static extern bool BringWindowToTop(IntPtr hwnd);
 
+		[DllImport("user32.dll", SetLastError = true)]
+		internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
 		/// <summary>
 		/// Enumerates all top-level windows on the screen.
 		/// </summary>

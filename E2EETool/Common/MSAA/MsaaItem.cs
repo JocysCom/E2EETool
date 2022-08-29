@@ -93,15 +93,21 @@ namespace MSAA
 			_IsValid = true;
 		}
 
-		public void SetValue(string value)
-		{
+		public void SetValue(string value) =>
 			_Accessible.accValue[_ChildId] = value;
-		}
 
-		public void SetName(string value)
-		{
+		public void SetName(string value) =>
 			_Accessible.accName[_ChildId] = value;
-		}
+
+		//https://docs.microsoft.com/en-us/windows/win32/winauto/selflag
+		public const int SELFLAG_NONE = 0;
+		public const int SELFLAG_TAKEFOCUS = 0x1;
+
+		public void Select() =>
+			_Accessible.accSelect(SELFLAG_NONE, _ChildId);
+
+		public void Focus() =>
+			_Accessible.accSelect(SELFLAG_TAKEFOCUS, _ChildId);
 
 		private void TrySetValue(Action action, List<MsaaRole> excludeList)
 		{

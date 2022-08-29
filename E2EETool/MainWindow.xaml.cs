@@ -40,7 +40,15 @@ namespace JocysCom.Tools.E2EETool
 			Global.AppSettings.PropertyChanged += AppSettings_PropertyChanged;
 			// Initialize.
 			InitializeComponent();
+			MainTab.SelectionChanged += MainTab_SelectionChanged;
 			LoadHelpAndInfo();
+		}
+
+		public bool IsChatSelected;
+
+		private void MainTab_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		{
+			IsChatSelected = MainTab.SelectedItem == ChatTabItem;
 		}
 
 		public static MainWindow Current;
@@ -74,13 +82,11 @@ namespace JocysCom.Tools.E2EETool
 			Global.AppData.Save();
 		}
 
-		public bool IsChatSelected =>
-			MainTab.SelectedItem == ChatTabItem;
-
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			IsClosing = true;
 		}
+
 
 	}
 

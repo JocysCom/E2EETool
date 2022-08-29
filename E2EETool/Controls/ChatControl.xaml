@@ -128,7 +128,7 @@
 						Content="Connect" />
 				</StackPanel>
 				<Button
-					x:Name="ShowXmlButton"
+					x:Name="ShowProgramXmlButton"
 					Grid.Row="0"
 					Grid.Column="3"
 					HorizontalAlignment="Left"
@@ -145,7 +145,7 @@
 					BorderThickness="0"
 					Text="{Binding ChatPath}" />
 				<Button
-					x:Name="ChatPathShowXmlButton"
+					x:Name="ShowChatXmlButton"
 					Grid.Row="2"
 					Grid.Column="3"
 					BorderThickness="0"
@@ -175,7 +175,7 @@
 					<Label Content="Status:" Style="{StaticResource ButtonLabel}" />
 					<StackPanel Style="{StaticResource ButtonStackPanel}">
 						<ContentControl x:Name="ProgramStatusUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />
-						<Label Content="Target Program" Style="{StaticResource ButtonLabel}" />
+						<Label Content="Target Program" x:Name="TargetProgramLabel" Style="{StaticResource ButtonLabel}" />
 					</StackPanel>
 					<StackPanel Style="{StaticResource ButtonStackPanel}">
 						<ContentControl x:Name="YourPrivateKeyUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />

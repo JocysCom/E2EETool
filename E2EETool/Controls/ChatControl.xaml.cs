@@ -332,18 +332,18 @@ namespace JocysCom.Tools.E2EETool.Controls
 			Task.Run(() =>
 			{
 				messageParser.AddMessage(message, MessageType.YourMessage);
-				var editHandle = IntPtr.Zero;
+				var focusHandle = IntPtr.Zero;
 				var editItem = _ProgramMsaaItems.FirstOrDefault(x => x.Role == MsaaRole.Text);
 				if (editItem != null)
 				{
 					editItem.Focus();
-					editHandle = editItem.Handle;
+					focusHandle = editItem.Handle;
 				}
 				//ControlsHelper.Invoke(() => InfoPanel.AddTask(SendingMessage));
 				var success = KeyboardHelper.SendTextMessage(
 					message, true,
 					_SelectedProcessWindow.MainWindowHandle,
-					editHandle,
+					focusHandle,
 					_CurrentProcess.MainWindowHandle
 				);
 				ControlsHelper.Invoke(() =>

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using System.Xml.Serialization;
 
 namespace JocysCom.Tools.E2EETool
 {
@@ -26,6 +28,7 @@ namespace JocysCom.Tools.E2EETool
 		public bool SaveKeysOnApplicationClose { get => _SaveKeysOnApplicationClose; set => SetProperty(ref _SaveKeysOnApplicationClose, value); }
 		private bool _SaveKeysOnApplicationClose = true;
 
+		[XmlElement(DataType =  "normalizedString")]
 		public string YourPublicKey { get => _YourPublicKey; set => SetProperty(ref _YourPublicKey, value); }
 		private string _YourPublicKey;
 		public string YourPrivateKey { get => _YourPrivateKey; set => SetProperty(ref _YourPrivateKey, value); }

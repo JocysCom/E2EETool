@@ -104,13 +104,13 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void DataTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter && !System.Windows.Input.Keyboard.IsKeyDown(Key.LeftShift) && !System.Windows.Input.Keyboard.IsKeyDown(Key.RightShift))
+			if (e.Key == Key.Enter && !Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift))
 			{
 				if (!string.IsNullOrEmpty(DataTextBox.Text))
 				{
-					var message = DataTextBox.Text.TrimEnd('\r', '\n');
+					var message = DataTextBox.Text;
 					DataListPanel.AddMessage("Out", message);
-					SendMessage(message);
+					SendMessage(message, true);
 					DataTextBox.Text = string.Empty;
 					ControlsHelper.AutoScroll(this);
 				}
@@ -327,11 +327,14 @@ namespace JocysCom.Tools.E2EETool.Controls
 			ShowMessage(xmlText.ToString());
 		}
 
-		private void SendMessage(string message)
+		private void SendMessage(string message, bool encrypt = true)
 		{
 			Task.Run(() =>
 			{
-				messageParser.AddMessage(message, MessageType.YourMessage);
+				var messageToSend = message;
+				if (encrypt)
+					messageToSend = Security.Encrypt(message);
+					messageParser.AddMessage(messageToSend, MessageType.YourMessage);
 				var focusHandle = IntPtr.Zero;
 				var editItem = _ProgramMsaaItems.FirstOrDefault(x => x.Role == MsaaRole.Text);
 				if (editItem != null)
@@ -341,7 +344,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				}
 				//ControlsHelper.Invoke(() => InfoPanel.AddTask(SendingMessage));
 				var success = KeyboardHelper.SendTextMessage(
-					message, true,
+					messageToSend, true,
 					_SelectedProcessWindow.MainWindowHandle,
 					focusHandle,
 					_CurrentProcess.MainWindowHandle
@@ -361,7 +364,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 		{
 			ControlsHelper.BeginInvoke(() =>
 			{
-				SendMessage(DataTextBox.Text);
+				SendMessage(DataTextBox.Text, true);
 			});
 		}
 

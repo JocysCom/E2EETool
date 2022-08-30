@@ -92,16 +92,14 @@ namespace JocysCom.Tools.E2EETool.Controls
 			EncryptedDataTextBox.Text = "Encrypting...";
 			try
 			{
-				var dataBytes = System.Text.Encoding.UTF8.GetBytes(DataTextBox.Text);
-				var encryptedBytes = Security.Encrypt(dataBytes);
-				var encryptedBase64 = Security.ToBase64(encryptedBytes, Base64HeaderType.Message);
+				var encryptedBase64 = Security.Encrypt(DataTextBox.Text);
 				// Display the encrypted data.
-				EncryptedDataTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
+				EncryptedDataTextBox.Foreground = SystemColors.ControlTextBrush;
 				EncryptedDataTextBox.Text = encryptedBase64;
 			}
 			catch (Exception ex)
 			{
-				EncryptedDataTextBox.Foreground = new SolidColorBrush(System.Windows.Media.Colors.DarkRed);
+				EncryptedDataTextBox.Foreground = new SolidColorBrush(Colors.DarkRed);
 				EncryptedDataTextBox.Text = ex.Message;
 			}
 		}
@@ -116,9 +114,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			OtherDecryptedTextBox.Text = "Decrypting...";
 			try
 			{
-				var encryptedBytes = Security.FromBase64(OtherEncryptedDataTextBox.Text);
-				var decryptedBytes = Security.Decrypt(encryptedBytes);
-				var decryptedData = System.Text.Encoding.UTF8.GetString(decryptedBytes);
+				var decryptedData = Security.Decrypt(OtherEncryptedDataTextBox.Text);
 				// Display the decrypted data.
 				OtherDecryptedTextBox.Foreground = System.Windows.SystemColors.ControlTextBrush;
 				OtherDecryptedTextBox.Text = decryptedData;

@@ -37,6 +37,14 @@ namespace JocysCom.Tools.E2EETool
 			Global.AppSettings.YourPrivateKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob), Base64HeaderType.PrivateKey);
 		}
 
+		public static string Encrypt(string message)
+		{
+			var dataBytes = Encoding.UTF8.GetBytes(message);
+			var encryptedBytes = Encrypt(dataBytes);
+			var encryptedBase64 = ToBase64(encryptedBytes, Base64HeaderType.Message);
+			return encryptedBase64;
+		}
+
 		public static byte[] Encrypt(byte[] dataBytes)
 		{
 			// Import parameters from BLOB.
@@ -51,6 +59,14 @@ namespace JocysCom.Tools.E2EETool
 			dataBytes = AddRandom(dataBytes);
 			var encryptedBytes = Encrypt(symetricKey, dataBytes);
 			return encryptedBytes;
+		}
+
+		public static string Decrypt(string base64)
+		{
+			var encryptedBytes = Security.FromBase64(base64);
+			var decryptedBytes = Security.Decrypt(encryptedBytes);
+			var decryptedData = System.Text.Encoding.UTF8.GetString(decryptedBytes);
+			return decryptedData;
 		}
 
 		public static byte[] Decrypt(byte[] dataBytes)

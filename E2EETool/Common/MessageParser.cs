@@ -43,7 +43,7 @@ namespace JocysCom.Tools.E2EETool
 			}
 		}
 
-		public bool TryParse(string text, out MessageItem item)
+		private bool TryParse(string text, out MessageItem item)
 		{
 			// By default it will be plain message.
 			item = new MessageItem();

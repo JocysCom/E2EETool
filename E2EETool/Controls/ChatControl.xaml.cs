@@ -11,6 +11,7 @@ using JocysCom.ClassLibrary.Processes;
 using JocysCom.ClassLibrary.Collections;
 using System.Xml.XPath;
 using System;
+using System.Threading;
 
 namespace JocysCom.Tools.E2EETool.Controls
 {
@@ -28,44 +29,51 @@ namespace JocysCom.Tools.E2EETool.Controls
 			UpdateControlButtons();
 			DataTextBox_TextChanged(null, null);
 			InfoPanel.Tasks.ListChanged += Tasks_ListChanged;
-			xmlParseTimer = new System.Timers.Timer();
-			xmlParseTimer.Interval = 2000;
-			xmlParseTimer.Elapsed += XmlParseTimer_Elapsed;
-			xmlParseTimer.AutoReset = false;
+			TimerTokenSource = new CancellationTokenSource();
+			// Star task in forewer loop.
+			Task.Run(() =>
+			{
+				while (!TimerTokenSource.Token.IsCancellationRequested && !MainWindow.IsClosing)
+				{
+					XmlParseTimerElapsed();
+					Task.Delay(TimerDelay, TimerTokenSource.Token);
+				}
+			});
 		}
 
-		System.Timers.Timer xmlParseTimer;
+		int TimerDelay = 500;
+		CancellationTokenSource TimerTokenSource;
 
 		MessageParser messageParser;
 
-		private void XmlParseTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		private void XmlParseTimerElapsed()
 		{
-			if (MainWindow.IsClosing)
-				return;
-			// Process nothing if chat is not selected
+			// If chat is not selected then skip.
 			if (!MainWindow.Current.IsChatSelected)
 			{
-				xmlParseTimer.Start();
 				return;
 			}
-			var isBusy = false;
-			ControlsHelper.Invoke(() =>
-			{
-				isBusy = InfoPanel.Tasks.Count > 0;
-			});
-			// If list is empty then try to refresh list.
+			// If programs list is empty then...
 			if (_AllMsaaItemWindowList.Count == 0)
 			{
+				// Try to refresh list.
+				var isBusy = false;
+				ControlsHelper.Invoke(() =>
+				{
+					isBusy = InfoPanel.Tasks.Count > 0;
+				});
 				if (!isBusy)
 					RefreshPrograms();
 			}
-			var selectedWindow = _SelectedMsaaItemWindow;
-			if (selectedWindow == null || !IsConnected)
-			{
-				if (!MainWindow.IsClosing)
-					xmlParseTimer.Start();
+			if (MainWindow.IsClosing)
 				return;
-			}
+			var selectedWindow = _SelectedMsaaItemWindow;
+			// If chat is not selected or not connected or program not selected then skip.
+			if (!MainWindow.Current.IsChatSelected || !IsConnected || selectedWindow == null)
+				return;
+			// Make timer refresh slower.
+			if (TimerDelay != 2000)
+				TimerDelay = 2000;
 			try
 			{
 				//ControlsHelper.Invoke(() => InfoPanel.AddTask(RefreshAutomationTreeTaskName));
@@ -82,16 +90,19 @@ namespace JocysCom.Tools.E2EETool.Controls
 			catch (System.Exception)
 			{
 			}
-			finally
+			ControlsHelper.Invoke(() =>
 			{
-				ControlsHelper.Invoke(() =>
+				// If just connected and send public key requested.
+				if (SendPublicKey)
 				{
-					UpdateControlButtons();
-					//InfoPanel.RemoveTask(RefreshAutomationTreeTaskName);
-				});
-				if (!MainWindow.IsClosing)
-					xmlParseTimer.Start();
-			}
+					SendPublicKey = false;
+					messageParser.AddMessage(Global.AppSettings.YourPublicKey, MessageType.YourPublicKey);
+					DataListPanel.AddMessage("Out", "Your Public Key was send.");
+					SendMessage(Global.AppSettings.YourPublicKey);
+				}
+				UpdateControlButtons();
+				//InfoPanel.RemoveTask(RefreshAutomationTreeTaskName);
+			});
 		}
 
 		private void Tasks_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
@@ -121,6 +132,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 		public string Connect = "Connect";
 		public string Disconnect = "Disconnect";
 		public bool IsConnected;
+		public bool SendPublicKey;
 
 		private void ConnectButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
@@ -129,12 +141,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				// If your keys are missing then generate new ones.
 				if (Global.AppSettings.YourPublicKey == null || Global.AppSettings.YourPrivateKey == null)
 					Security.GenerateKeys();
-				messageParser.AddMessage(Global.AppSettings.YourPublicKey, MessageType.YourPublicKey);
-				DataListPanel.AddMessage("Out", "Your Public Key was send.");
-				ControlsHelper.BeginInvoke(() =>
-				{
-					SendMessage(Global.AppSettings.YourPublicKey);
-				});
+				//SendPublicKey = true;
 				ConnectButton.Content = Disconnect;
 				IsConnected = true;
 			}
@@ -149,14 +156,14 @@ namespace JocysCom.Tools.E2EETool.Controls
 		{
 			if (ControlsHelper.IsDesignMode(this))
 				return;
-			// Commented future feature.
-			//RefreshPrograms();
-			xmlParseTimer.Start();
 		}
 
 		private void ProgramListRefreshButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-			RefreshPrograms();
+			Task.Run(() =>
+			{
+				RefreshPrograms();
+			});
 		}
 
 		const string RefreshProgramsTaskName = nameof(RefreshProgramsTaskName);
@@ -187,56 +194,53 @@ namespace JocysCom.Tools.E2EETool.Controls
 			var allMsaaItemWindowList = new List<MsaaItem>();
 			var allProcessWindowList = new List<Process>();
 			List<MsaaItem> windows = null;
-			Task.Run(() =>
+			ControlsHelper.Invoke(() =>
 			{
-				ControlsHelper.Invoke(() =>
+				var selection = ProgramsComboBox.SelectedItem as ComboBoxItem;
+				programTitle = selection?.Content as string;
+				InfoPanel.AddTask(RefreshProgramsTaskName);
+			});
+			try
+			{
+				// Get all Accessibility items.
+				windows = Msaa
+					.GetWindows(null, MsaaRole.Window)
+					.Select(x => new MsaaItem(x))
+					.Where(x => !string.IsNullOrEmpty(x.Name))
+					.Where(x => x.IsVisible && x.IsEnabled)
+					.ToList();
+				foreach (var window in windows)
 				{
-					var selection = ProgramsComboBox.SelectedItem as ComboBoxItem;
-					programTitle = selection?.Content as string;
-					InfoPanel.AddTask(RefreshProgramsTaskName);
-				});
-				try
-				{
-					// Get all Accessibility items.
-					windows = Msaa
-						.GetWindows(null, MsaaRole.Window)
-						.Select(x => new MsaaItem(x))
-						.Where(x => !string.IsNullOrEmpty(x.Name))
-						.Where(x => x.IsVisible && x.IsEnabled)
-						.ToList();
-					foreach (var window in windows)
+					MsaaWin32.GetWindowThreadProcessId(window.Handle, out uint processId);
+					var process = Process.GetProcessById((int)processId);
+					if (process != null)
 					{
-						MsaaWin32.GetWindowThreadProcessId(window.Handle, out uint processId);
-						var process = Process.GetProcessById((int)processId);
-						if (process != null)
-						{
-							allMsaaItemWindowList.Add(window);
-							allProcessWindowList.Add(process);
-						}
+						allMsaaItemWindowList.Add(window);
+						allProcessWindowList.Add(process);
 					}
 				}
-				catch (System.Exception)
+			}
+			catch (System.Exception)
+			{
+			}
+			// Update combobox from results.
+			ControlsHelper.Invoke(() =>
+			{
+				CollectionsHelper.Synchronize(allMsaaItemWindowList, _AllMsaaItemWindowList);
+				CollectionsHelper.Synchronize(allProcessWindowList, _AllProcessWindowList);
+				// Attach title and index to combobox.
+				var all = allMsaaItemWindowList
+					.Select((x, index) => new ComboBoxItem() { Content = x.Name, Tag = index })
+					.OrderBy(x => x.Content)
+					.ToArray();
+				ProgramsComboBox.ItemsSource = all;
+				if (programTitle != null)
 				{
+					var item = all.FirstOrDefault(x => Equals(x.Content, programTitle));
+					if (item != null)
+						item.IsSelected = true;
 				}
-				// Update combobox from results.
-				ControlsHelper.Invoke(() =>
-				{
-					CollectionsHelper.Synchronize(allMsaaItemWindowList, _AllMsaaItemWindowList);
-					CollectionsHelper.Synchronize(allProcessWindowList, _AllProcessWindowList);
-					// Attach title and index to combobox.
-					var all = allMsaaItemWindowList
-						.Select((x, index) => new ComboBoxItem() { Content = x.Name, Tag = index })
-						.OrderBy(x => x.Content)
-						.ToArray();
-					ProgramsComboBox.ItemsSource = all;
-					if (programTitle != null)
-					{
-						var item = all.FirstOrDefault(x => Equals(x.Content, programTitle));
-						if (item != null)
-							item.IsSelected = true;
-					}
-					InfoPanel.RemoveTask(RefreshProgramsTaskName);
-				});
+				InfoPanel.RemoveTask(RefreshProgramsTaskName);
 			});
 		}
 
@@ -334,7 +338,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				var messageToSend = message;
 				if (encrypt)
 					messageToSend = Security.Encrypt(message);
-					messageParser.AddMessage(messageToSend, MessageType.YourMessage);
+				messageParser.AddMessage(messageToSend, MessageType.YourMessage);
 				var focusHandle = IntPtr.Zero;
 				var editItem = _ProgramMsaaItems.FirstOrDefault(x => x.Role == MsaaRole.Text);
 				if (editItem != null)

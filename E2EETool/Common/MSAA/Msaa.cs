@@ -82,12 +82,11 @@ namespace MSAA
 				// If failed to retrieve the object then continue.
 				if (accItem == default(IAccessible))
 					continue;
-				var name = accItem.accName ?? "";
-				var role = (MsaaRole)Convert.ToUInt32(accItem.accRole);
-				if (roles.Length > 0 && !roles.Contains(role))
+				var mi = new MsaaItem(accItem);
+				if (roles.Length > 0 && !roles.Contains(mi.Role))
 					continue;
-				// If filter specified but name don't match then continue.
-				if (windowName != null && !windowName.Match(name).Success)
+				// If filter by name specified but name don't match then continue.
+				if (windowName != null && !windowName.Match(mi.Name).Success)
 					continue;
 				list.Add(accItem);
 			}

@@ -17,8 +17,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 			if (ControlsHelper.IsDesignMode(this))
 				return;
 			SetDataItems(new SortableBindingList<DataItem>());
-			AddMessage("In", "Message In", true);
-			AddMessage("Out", "Message Out");
 		}
 
 		public void SetDataItems(SortableBindingList<DataItem> dataItems)
@@ -58,14 +56,40 @@ namespace JocysCom.Tools.E2EETool.Controls
 				return;
 		}
 
-		public void AddMessage(string user, string body, bool incomming = false)
+		public void AddMessage(string user, string body, MessageType style = MessageType.None)
 		{
 			DataItems.Add(new DataItem()
 			{
 				User = user,
 				Body = body,
-				Style = (Style)Resources[ incomming ? "MessageIn" : "MessageOut"]
+				Style = (Style)Resources[style.ToString()],
 			});
+		}
+
+		public void AddMessage(MessageItem item)
+		{
+			switch (item.MessageType)
+			{
+				case MessageType.None:
+					break;
+				case MessageType.YourPublicKey:
+					AddMessage("Out", "Your Public Key", MessageType.YourPublicKey);
+					break;
+				case MessageType.YourMessage:
+					AddMessage("Out", item.Message, MessageType.YourPublicKey);
+					break;
+				case MessageType.OtherPublicKey:
+					AddMessage("In", "Other Public Key", MessageType.OtherPublicKey);
+					// Update public key.
+					Global.AppSettings.OtherPublicKey = item.Message;
+					break;
+				case MessageType.OtherMessage:
+					AddMessage("In", item.Message, MessageType.OtherMessage);
+					break;
+				default:
+					break;
+			}
+
 		}
 
 	}

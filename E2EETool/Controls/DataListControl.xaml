@@ -13,7 +13,7 @@
 	Loaded="UserControl_Loaded"
 	mc:Ignorable="d">
 	<UserControl.Resources>
-		<Style x:Key="MessageIn" TargetType="StackPanel">
+		<Style x:Key="OtherMessage" TargetType="StackPanel">
 			<Setter Property="Margin" Value="0,0,48,0" />
 			<Setter Property="HorizontalAlignment" Value="Left" />
 			<Style.Resources>
@@ -23,12 +23,34 @@
 				</Style>
 			</Style.Resources>
 		</Style>
-		<Style x:Key="MessageOut" TargetType="StackPanel">
+		<Style x:Key="OtherPublicKey" TargetType="StackPanel">
+			<Setter Property="Margin" Value="0,0,48,0" />
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Style.Resources>
+				<Style TargetType="Border">
+					<Setter Property="Background" Value="#f2f6f9" />
+					<Setter Property="Opacity" Value="0.5" />
+					<Setter Property="CornerRadius" Value="0,12,12,12" />
+				</Style>
+			</Style.Resources>
+		</Style>
+		<Style x:Key="YourMessage" TargetType="StackPanel">
 			<Setter Property="Margin" Value="48,0,0,0" />
 			<Setter Property="HorizontalAlignment" Value="Right" />
 			<Style.Resources>
 				<Style TargetType="Border">
 					<Setter Property="Background" Value="#dbf1ff" />
+					<Setter Property="CornerRadius" Value="12,0,12,12" />
+				</Style>
+			</Style.Resources>
+		</Style>
+		<Style x:Key="YourPublicKey" TargetType="StackPanel">
+			<Setter Property="Margin" Value="48,0,0,0" />
+			<Setter Property="HorizontalAlignment" Value="Right" />
+			<Style.Resources>
+				<Style TargetType="Border">
+					<Setter Property="Background" Value="#dbf1ff" />
+					<Setter Property="Opacity" Value="0.5" />
 					<Setter Property="CornerRadius" Value="12,0,12,12" />
 				</Style>
 			</Style.Resources>

@@ -21,6 +21,14 @@ namespace JocysCom.Tools.E2EETool
 
 		public void ParseMessages(IEnumerable<MsaaItem> list, out List<MessageItem> newItems)
 		{
+			_ParseMessages(list, out newItems);
+			// If this collection of old skype items not complete yet then...
+			if (!OldItemsComplete)
+				OldItemsComplete = true;
+		}
+
+		private void _ParseMessages(IEnumerable<MsaaItem> list, out List<MessageItem> newItems)
+		{
 			newItems = new List<MessageItem>();
 			if (list == null)
 				return;
@@ -32,13 +40,18 @@ namespace JocysCom.Tools.E2EETool
 				if (!Items.Any(x => x.Message == name) && TryParse(name, out var byName))
 				{
 					Items.Add(byName);
-					newItems.Add(byName);
+					if (OldItemsComplete)
+						newItems.Add(byName);
 				}
+				// Skip if 'name' and 'value' values are the same.
+				if (name != value)
+					continue;
 				// If message value not found then...
 				if (!Items.Any(x => x.Message == value) && TryParse(value, out var byValue))
 				{
 					Items.Add(byValue);
-					newItems.Add(byValue);
+					if (OldItemsComplete)
+						newItems.Add(byValue);
 				}
 			}
 		}
@@ -81,28 +94,48 @@ namespace JocysCom.Tools.E2EETool
 			try
 			{
 				var key = CngKey.Import(bytes, CngKeyBlobFormat.EccPublicBlob);
-				// Try to find item from the past.
-				var keyItem = Items.FirstOrDefault(x => x.Message == text);
-				item.MessageType = keyItem == null
-					? MessageType.OtherPublicKey
-					: MessageType.YourPublicKey;
 				// Check against your public key.
 				if (string.IsNullOrEmpty(Global.AppSettings.YourPublicKey))
 				{
 					var keyBytes = Security.FromBase64(Global.AppSettings.YourPublicKey);
 					if (Enumerable.SequenceEqual(keyBytes, bytes))
+					{
 						item.MessageType = MessageType.YourPublicKey;
+						return true;
+					}
 				}
 				// Check against other public key.
 				if (string.IsNullOrEmpty(Global.AppSettings.OtherPublicKey))
 				{
 					var keyBytes = Security.FromBase64(Global.AppSettings.OtherPublicKey);
 					if (Enumerable.SequenceEqual(keyBytes, bytes))
+					{
 						item.MessageType = MessageType.OtherPublicKey;
+						return true;
+					}
 				}
+				// Try to find most recent item from the past.
+				var keyItem = Items
+					.OrderByDescending(x => x.Created)
+					.FirstOrDefault(x => x.Message == text);
+				item.MessageType = keyItem == null
+					// Assume this is the key from the other side.
+					? MessageType.OtherPublicKey
+					: keyItem.MessageType;
 			}
 			catch { }
 			return true;
+		}
+
+		/// <summary>
+		///  Will be used to skip old items on chat window.
+		/// </summary>
+		public bool OldItemsComplete = false;
+
+		public void Reset()
+		{
+			OldItemsComplete = false;
+			Items.Clear();
 		}
 
 	}

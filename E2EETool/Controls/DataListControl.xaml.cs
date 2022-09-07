@@ -56,7 +56,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				return;
 		}
 
-		public void AddMessage(string user, string body, MessageType style = MessageType.None)
+		private void AddMessage(string user, string body, MessageType style = MessageType.None)
 		{
 			DataItems.Add(new DataItem()
 			{
@@ -66,9 +66,9 @@ namespace JocysCom.Tools.E2EETool.Controls
 			});
 		}
 
-		public void AddMessage(MessageItem item)
+		public void AddMessage(MessageType messageType, string message = null, string decryptedMessage = null)
 		{
-			switch (item.MessageType)
+			switch (messageType)
 			{
 				case MessageType.None:
 					break;
@@ -76,15 +76,15 @@ namespace JocysCom.Tools.E2EETool.Controls
 					AddMessage("Out", "Your Public Key", MessageType.YourPublicKey);
 					break;
 				case MessageType.YourMessage:
-					AddMessage("Out", item.Message, MessageType.YourPublicKey);
+					AddMessage("Out", message, MessageType.YourPublicKey);
 					break;
 				case MessageType.OtherPublicKey:
 					AddMessage("In", "Other Public Key", MessageType.OtherPublicKey);
 					// Update public key.
-					Global.AppSettings.OtherPublicKey = item.Message;
+					Global.AppSettings.OtherPublicKey = message;
 					break;
 				case MessageType.OtherMessage:
-					AddMessage("In", item.Message, MessageType.OtherMessage);
+					AddMessage("In", decryptedMessage, MessageType.OtherMessage);
 					break;
 				default:
 					break;

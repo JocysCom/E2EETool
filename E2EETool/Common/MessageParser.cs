@@ -11,10 +11,14 @@ namespace JocysCom.Tools.E2EETool
 		public Regex Base64Regex = new Regex("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
 		public List<MessageItem> Items = new List<MessageItem>();
 
+		/// <summary>
+		/// Add incomming messages manually.
+		/// </summary>
 		public void AddMessage(string message, MessageType type)
 		{
 			var item = new MessageItem();
 			item.Message = message;
+			item.IsOld = true;
 			item.MessageType = type;
 			Items.Add(item);
 		}
@@ -37,7 +41,7 @@ namespace JocysCom.Tools.E2EETool
 				var name = item.Name;
 				var value = item.Value;
 				// If message name not found then...
-				if (!Items.Any(x => x.Message == name) && TryParse(name, out var byName))
+				if (!Items.Any(x => x.IsSame(name)) && TryParse(name, out var byName))
 				{
 					Items.Add(byName);
 					if (OldItemsComplete)
@@ -47,7 +51,7 @@ namespace JocysCom.Tools.E2EETool
 				if (name != value)
 					continue;
 				// If message value not found then...
-				if (!Items.Any(x => x.Message == value) && TryParse(value, out var byValue))
+				if (!Items.Any(x => x.IsSame(value)) && TryParse(value, out var byValue))
 				{
 					Items.Add(byValue);
 					if (OldItemsComplete)
@@ -83,11 +87,13 @@ namespace JocysCom.Tools.E2EETool
 			{
 				var textBytes = Security.Decrypt(bytes);
 				item.MessageType = MessageType.YourMessage;
+				item.DecryptedMessage = System.Text.Encoding.UTF8.GetString(textBytes);
 				// Try to find item from the past.
 				var messageItem = Items.FirstOrDefault(x => x.Message == text);
 				item.MessageType = messageItem == null
 					? MessageType.OtherMessage
 					: MessageType.YourMessage;
+				return true;
 			}
 			catch { }
 			// Try parse as public key.

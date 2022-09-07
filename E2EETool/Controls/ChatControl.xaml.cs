@@ -92,7 +92,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				{
 					ControlsHelper.Invoke(() =>
 					{
-						DataListPanel.AddMessage(item);
+						DataListPanel.AddMessage(item.MessageType, item.Message, item.DecryptedMessage);
 					});
 				}
 
@@ -108,7 +108,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 					SendPublicKey = false;
 					messageParser.AddMessage(Global.AppSettings.YourPublicKey, MessageType.YourPublicKey);
 					//DataListPanel.AddMessage("Out", "Your Public Key was send.");
-					SendMessage(Global.AppSettings.YourPublicKey);
+					SendMessage(Global.AppSettings.YourPublicKey, MessageType.YourPublicKey);
 				}
 				UpdateControlButtons();
 				//InfoPanel.RemoveTask(RefreshAutomationTreeTaskName);
@@ -124,6 +124,14 @@ namespace JocysCom.Tools.E2EETool.Controls
 		InfoControl InfoPanel
 			=> MainWindow.Current.InfoPanel;
 
+		private void SendButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			ControlsHelper.BeginInvoke(() =>
+			{
+				SendMessage(DataTextBox.Text, MessageType.YourMessage);
+			});
+		}
+
 		private void DataTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter && !Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift))
@@ -131,8 +139,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 				if (!string.IsNullOrEmpty(DataTextBox.Text))
 				{
 					var message = DataTextBox.Text;
-					DataListPanel.AddMessage("Out", message);
-					SendMessage(message, true);
+					SendMessage(message, MessageType.YourMessage);
 					DataTextBox.Text = string.Empty;
 					ControlsHelper.AutoScroll(this);
 				}
@@ -343,45 +350,53 @@ namespace JocysCom.Tools.E2EETool.Controls
 			ShowMessage(xmlText.ToString());
 		}
 
-		private void SendMessage(string message, bool encrypt = false)
+		private void SendMessage(string message, MessageType messageType)
 		{
+			var messageToSend = message;
+			// It this is your message then...
+			if (messageType == MessageType.YourMessage)
+			{
+				// ...message must be encrypted.
+				messageToSend = Security.Encrypt(message);
+				DataListPanel.AddMessage(MessageType.YourMessage, message);
+			}
+			else if (messageType == MessageType.YourPublicKey)
+			{
+				DataListPanel.AddMessage(MessageType.YourPublicKey);
+			}
+			else
+			{
+				throw new NotSupportedException();
+			}
+			// Add message to parser so that it will be skipped as old.
+			messageParser.AddMessage(messageToSend, messageType);
+			// Begin adding message to chat program window.
 			Task.Run(() =>
 			{
-				var messageToSend = message;
-				if (encrypt)
-					messageToSend = Security.Encrypt(message);
-				messageParser.AddMessage(messageToSend, MessageType.YourMessage);
-				var focusHandle = IntPtr.Zero;
-				var editItem = _SelectedWindowAllMsaaItems.FirstOrDefault(x => x.Role == MsaaRole.Text);
-				if (editItem != null)
-				{
-					editItem.Focus();
-					focusHandle = editItem.Handle;
-				}
-				//ControlsHelper.Invoke(() => InfoPanel.AddTask(SendingMessage));
+				// Type message into chat program window.
+				var focusHandle = GetFocusHandle();
 				var success = KeyboardHelper.SendTextMessage(
 					messageToSend, true, true,
 					_SelectedWindowProcess.MainWindowHandle,
 					focusHandle,
 					_CurrentProcess.MainWindowHandle
 				);
-				ControlsHelper.Invoke(() =>
-				{
-					//InfoPanel.RemoveTask(SendingMessage);
-					//TargetProgramLabel.Content = success
-					//	? "Target Program: OK"
-					//	: "Target Program: Fail";
-
-				});
 			});
 		}
 
-		private void SendButton_Click(object sender, System.Windows.RoutedEventArgs e)
+		/// <summary>
+		/// Get chat window edit box handle.
+		/// </summary>
+		public IntPtr GetFocusHandle()
 		{
-			ControlsHelper.BeginInvoke(() =>
+			var focusHandle = IntPtr.Zero;
+			var editItem = _SelectedWindowAllMsaaItems.FirstOrDefault(x => x.Role == MsaaRole.Text);
+			if (editItem != null)
 			{
-				SendMessage(DataTextBox.Text, true);
-			});
+				editItem.Focus();
+				focusHandle = editItem.Handle;
+			}
+			return focusHandle;
 		}
 
 		private void DataTextBox_TextChanged(object sender, TextChangedEventArgs e)

@@ -52,6 +52,15 @@ namespace JocysCom.Tools.E2EETool
 		public bool AddBase64FileHeaders { get => _AddBase64FileHeaders; set => SetProperty(ref _AddBase64FileHeaders, value); }
 		private bool _AddBase64FileHeaders = true;
 
+
+		[DefaultValue(false)]
+		public bool ChatAddBase64KeyHeaders { get => _ChatAddBase64KeyHeaders; set => SetProperty(ref _ChatAddBase64KeyHeaders, value); }
+		private bool _ChatAddBase64KeyHeaders;
+
+		[DefaultValue(false)]
+		public bool ChatAddBase64MessageHeaders { get => _ChatAddBase64MessageHeaders; set => SetProperty(ref _ChatAddBase64MessageHeaders, value); }
+		private bool _ChatAddBase64MessageHeaders;
+
 		#endregion
 
 		public List<AppAutoSettings> AutoSettings { get => _AutoSettings; set => SetProperty(ref _AutoSettings, value); }

@@ -10,14 +10,14 @@
 	mc:Ignorable="d">
 	<Grid>
 		<StackPanel>
-			<GroupBox
-				Grid.Row="1"
-				Grid.RowSpan="2"
-				Grid.Column="2"
-				Grid.ColumnSpan="2"
-				Header="Options">
+			<GroupBox Header="Program">
 				<WrapPanel Orientation="Vertical">
 					<CheckBox Name="AlwaysOnTopCheckBox" Content="Always on Top" IsChecked="{Binding AlwaysOnTop, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+				</WrapPanel>
+			</GroupBox>
+
+			<GroupBox Header="Main">
+				<WrapPanel Orientation="Vertical">
 					<CheckBox Name="ShowPrivateKeyCheckBox" Content="Show Private Key" IsChecked="{Binding ShowPrivateKey, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 					<CheckBox Name="ShowMessageButtonsCheckBox" Content="Show Encrypt and Decrypt message buttons" IsChecked="{Binding ShowMessageButtons, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 					<CheckBox Name="GenerateKeysOnApplicationStartCheckBox" Content="Generate Keys on Application Start" IsChecked="{Binding GenerateKeysOnApplicationStart, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -27,6 +27,15 @@
 					<CheckBox Name="AddBase64FileHeaders" Content="Add Base64 File Headers" IsChecked="{Binding AddBase64FileHeaders, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 				</WrapPanel>
 			</GroupBox>
+
+			<GroupBox Header="Chat">
+				<WrapPanel Orientation="Vertical">
+					<CheckBox Name="ChatAddBase64KeyHeadersCheckBox" Content="Add Base64 Key Headers" IsChecked="{Binding ChatAddBase64KeyHeaders, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+					<CheckBox Name="ChatAddBase64MessageHeaders" Content="Add Base64 Message Headers" IsChecked="{Binding ChatAddBase64MessageHeaders, Source={x:Static root:Global.AppSettings}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+				</WrapPanel>
+			</GroupBox>
+
+
 		</StackPanel>
 	</Grid>
 </UserControl>

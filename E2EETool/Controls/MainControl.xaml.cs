@@ -92,7 +92,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 			EncryptedDataTextBox.Text = "Encrypting...";
 			try
 			{
-				var encryptedBase64 = Security.Encrypt(DataTextBox.Text);
+				var encryptedBase64 = Security.Encrypt(DataTextBox.Text,
+					Global.AppSettings.ChatAddBase64MessageHeaders ? Base64HeaderType.Message : Base64HeaderType.None);
 				// Display the encrypted data.
 				EncryptedDataTextBox.Foreground = SystemColors.ControlTextBrush;
 				EncryptedDataTextBox.Text = encryptedBase64;
@@ -328,7 +329,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 			// If must encrypt to Base64 then...
 			if (!decrypt && targetPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
 			{
-				var encryptedBase64 = Security.ToBase64(targetBytes, Base64HeaderType.Data);
+				var encryptedBase64 = Security.ToBase64(targetBytes,
+					Global.AppSettings.AddBase64FileHeaders ? Base64HeaderType.Data : Base64HeaderType.None);
 				File.WriteAllText(targetPath, encryptedBase64);
 			}
 			else

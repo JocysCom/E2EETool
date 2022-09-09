@@ -106,9 +106,12 @@ namespace JocysCom.Tools.E2EETool.Controls
 				if (SendPublicKey)
 				{
 					SendPublicKey = false;
-					messageParser.AddMessage(Global.AppSettings.YourPublicKey, MessageType.YourPublicKey);
+					var keyBytes = Security.FromBase64(Global.AppSettings.YourPublicKey);
+					var keyBase64 = Security.ToBase64(keyBytes,
+						Global.AppSettings.ChatAddBase64KeyHeaders ? Base64HeaderType.PublicKey : Base64HeaderType.None);
+					messageParser.AddMessage(keyBase64, MessageType.YourPublicKey);
 					//DataListPanel.AddMessage("Out", "Your Public Key was send.");
-					SendMessage(Global.AppSettings.YourPublicKey, MessageType.YourPublicKey);
+					SendMessage(keyBase64, MessageType.YourPublicKey);
 				}
 				UpdateControlButtons();
 				//InfoPanel.RemoveTask(RefreshAutomationTreeTaskName);
@@ -350,6 +353,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			ShowMessage(xmlText.ToString());
 		}
 
+
 		private void SendMessage(string message, MessageType messageType)
 		{
 			var messageToSend = message;
@@ -357,7 +361,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 			if (messageType == MessageType.YourMessage)
 			{
 				// ...message must be encrypted.
-				messageToSend = Security.Encrypt(message);
+				messageToSend = Security.Encrypt(message,
+					Global.AppSettings.ChatAddBase64MessageHeaders ? Base64HeaderType.Message : Base64HeaderType.None);
 				DataListPanel.AddMessage(MessageType.YourMessage, message);
 			}
 			else if (messageType == MessageType.YourPublicKey)

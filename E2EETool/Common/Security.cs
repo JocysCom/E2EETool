@@ -33,15 +33,17 @@ namespace JocysCom.Tools.E2EETool
 		public static void GenerateKeys()
 		{
 			var ecdh = GetNewEcdhProvider(384);
-			Global.AppSettings.YourPublicKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPublicBlob), Base64HeaderType.PublicKey);
-			Global.AppSettings.YourPrivateKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob), Base64HeaderType.PrivateKey);
+			Global.AppSettings.YourPublicKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPublicBlob),
+				Global.AppSettings.AddBase64KeyHeaders ? Base64HeaderType.PublicKey : Base64HeaderType.None);
+			Global.AppSettings.YourPrivateKey = ToBase64(ecdh.Key.Export(CngKeyBlobFormat.EccPrivateBlob),
+				Global.AppSettings.AddBase64KeyHeaders ? Base64HeaderType.PublicKey : Base64HeaderType.None);
 		}
 
-		public static string Encrypt(string message)
+		public static string Encrypt(string message, Base64HeaderType headerType)
 		{
 			var dataBytes = Encoding.UTF8.GetBytes(message);
 			var encryptedBytes = Encrypt(dataBytes);
-			var encryptedBase64 = ToBase64(encryptedBytes, Base64HeaderType.Message);
+			var encryptedBase64 = ToBase64(encryptedBytes, headerType);
 			return encryptedBase64;
 		}
 
@@ -127,22 +129,14 @@ namespace JocysCom.Tools.E2EETool
 		{
 			var s = Convert.ToBase64String(bytes);
 			s = InsertNewLines(s, 64);
-			if (headerType == Base64HeaderType.PublicKey && Global.AppSettings.AddBase64KeyHeaders)
-			{
+			if (headerType == Base64HeaderType.PublicKey)
 				s = "-----BEGIN EC PUBLIC KEY-----\r\n" + s + "\r\n-----END EC PUBLIC KEY-----\r\n";
-			}
-			if (headerType == Base64HeaderType.PrivateKey && Global.AppSettings.AddBase64KeyHeaders)
-			{
+			if (headerType == Base64HeaderType.PrivateKey)
 				s = "-----BEGIN EC PRIVATE KEY-----\r\n" + s + "\r\n-----END EC PRIVATE KEY-----\r\n";
-			}
-			if (headerType == Base64HeaderType.Data && Global.AppSettings.AddBase64FileHeaders)
-			{
+			if (headerType == Base64HeaderType.Data)
 				s = "-----BEGIN ENCRYPTED DATA-----\r\n" + s + "\r\n-----END ENCRYPTED DATA-----\r\n";
-			}
-			if (headerType == Base64HeaderType.Message && Global.AppSettings.AddBase64MessageHeaders)
-			{
+			if (headerType == Base64HeaderType.Message)
 				s = "-----BEGIN ENCRYPTED MESSAGE-----\r\n" + s + "\r\n-----END ENCRYPTED MESSAGE-----\r\n";
-			}
 			return s;
 		}
 

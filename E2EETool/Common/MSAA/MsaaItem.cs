@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.Xml.Serialization;
 using Accessibility;
 
 namespace MSAA
 {
+
 	public class MsaaItem
 	{
-		public MsaaItem(IAccessible acc, int childId = 0)
+		public MsaaItem()
+		{
+		}
+
+		public void Load(IAccessible acc, int childId = 0)
 		{
 			_Accessible = acc;
 			_ChildId = childId;
@@ -17,36 +24,43 @@ namespace MSAA
 		/// <summary>
 		/// Manually set ID. Used to find this object by Id in XML.
 		/// </summary>
+		[XmlAttribute, DefaultValue(0)]
 		public int Id { get; set; }
+
+		[XmlAttribute]
+		public MsaaRole Role { get => _Role; set => _Role = value; }
+		MsaaRole _Role;
+
+		[XmlAttribute, DefaultValue(typeof(MsaaState), nameof(MsaaState.Normal))]
+		public MsaaState State { get => _State; set => _State = value; }
+		MsaaState _State;
 
 		public IAccessible Accessible => _Accessible;
 		IAccessible _Accessible;
 
-		public int ChildId => _ChildId;
+		[XmlAttribute, DefaultValue(0)]
+		public int ChildId { get => _ChildId; set => _ChildId = value; }
 		int _ChildId;
 
 
-		public string Name => _Name;
+		[XmlAttribute, DefaultValue("")]
+		public string Name { get => _Name; set => _Name = value; }
 		string _Name;
 
-		public string Value => _Value;
+		[XmlAttribute, DefaultValue("")]
+		public string Value { get => _Value; set => _Value = value; }
 		string _Value;
-
-		public MsaaState State => _State;
-		MsaaState _State;
-
-		public MsaaRole Role => _Role;
-		MsaaRole _Role;
 
 		public bool IsEnabled => !State.HasFlag(MsaaState.Unavailable);
 		public bool IsVisible => !State.HasFlag(MsaaState.Invisible);
-		public bool IsExist => Handle != IntPtr.Zero;
+		public bool IsExist => Handle != 0;
 
 		public Rectangle Location => _Location;
 		Rectangle _Location;
 
-		public IntPtr Handle => _Handle;
-		IntPtr _Handle;
+		[XmlAttribute]
+		public int Handle { get => _Handle; set => _Handle = value; }
+		int _Handle;
 
 		public string DefaultAction => _DefaultAction;
 		string _DefaultAction;
@@ -69,7 +83,7 @@ namespace MSAA
 			_Value = string.Empty;
 			_Role = default(MsaaRole);
 			_State = default(MsaaState);
-			_Handle = IntPtr.Zero;
+			_Handle = 0;
 			_Location = new Rectangle();
 			_DefaultAction = string.Empty;
 			if (_Accessible == null || _Accessible == default(IAccessible))
@@ -83,7 +97,9 @@ namespace MSAA
 				}
 			}
 			if (_Accessible != null)
-				_Handle = Msaa.WindowFromAccessibleObject(_Accessible);
+				_Handle = Msaa.WindowFromAccessibleObject(_Accessible).ToInt32();
+
+
 			TrySetValue(() => _Name = _Accessible.accName[_ChildId], NoName);
 			TrySetValue(() => _Value = _Accessible.accValue[_ChildId], NoValue);
 			TrySetValue(() => _Role = (MsaaRole)Convert.ToUInt32(_Accessible.accRole[_ChildId]), NoRole);
@@ -152,8 +168,16 @@ namespace MSAA
 		public MsaaItem Parent =>
 			Msaa.GetAccessibleParent(this);
 
-		public MsaaItem[] Children =>
-			Msaa.GetAccessibleChildren(this);
+		[XmlElement(nameof(MsaaItem))]
+		public MsaaItem[] Children
+		{
+			get { return _Children = _Children ?? Msaa.GetAccessibleChildren(this); }
+			set { _Children = Children; }
+		}
+		public MsaaItem[] _Children;
 
 	}
+
+
+
 }

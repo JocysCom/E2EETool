@@ -9,7 +9,6 @@ using System.Xml.Linq;
 using System.Diagnostics;
 using JocysCom.ClassLibrary.Processes;
 using JocysCom.ClassLibrary.Collections;
-using System.Xml.XPath;
 using System;
 
 namespace JocysCom.Tools.E2EETool.Controls
@@ -62,7 +61,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			}
 			if (MainWindow.IsClosing)
 				return;
-			var selectedWindow = _SelectedWindowMsaaItem;
+			var selectedWindow = SelectedWindowMsaaItem;
 			// If chat is not selected or not connected or program not selected then skip.
 			if (!MainWindow.Current.IsChatSelected || !IsConnected || selectedWindow == null)
 			{
@@ -81,11 +80,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 				//ControlsHelper.Invoke(() => InfoPanel.AddTask(RefreshAutomationTreeTaskName));
 				// Get window XML and all relevant MSAA items
 				_SelectedWindowAllMsaaItems.Clear();
-				_SelectedWindowXml = ToXml(selectedWindow, ref _SelectedWindowAllMsaaItems);
+				var xml = ToXml(selectedWindow, ref _SelectedWindowAllMsaaItems);
 				var chatPath = AutoSettings.ChatPath;
-				_ChatXml = string.IsNullOrEmpty(chatPath)
-					? null
-					: _SelectedWindowXml?.XPathSelectElements(chatPath);
 				List<MessageItem> newItems;
 				messageParser.ParseMessages(_SelectedWindowAllMsaaItems, out newItems);
 				foreach (var item in newItems)
@@ -199,14 +195,15 @@ namespace JocysCom.Tools.E2EETool.Controls
 		List<Process> _AllWindowProcesses = new List<Process>();
 
 		// Currently selected MsaaItem windows and their processes.
-		MsaaItem _SelectedWindowMsaaItem;
+		MsaaItem SelectedWindowMsaaItem
+		{
+			get => _SelectedWindowMsaaItem;
+			set { _SelectedWindowMsaaItem = value; UpdateControlButtons(); }
+		}
+		MsaaItem _SelectedWindowMsaaItem { get; set; }
+
 		Process _SelectedWindowProcess;
 
-		/// <summary>
-		/// All Program window elements as XML.
-		/// </summary>
-		XElement _SelectedWindowXml;
-		IEnumerable<XElement> _ChatXml;
 		List<MsaaItem> _SelectedWindowAllMsaaItems = new List<MsaaItem>();
 
 		void RefreshWindowList()
@@ -227,13 +224,13 @@ namespace JocysCom.Tools.E2EETool.Controls
 				// Get all Accessibility items.
 				windows = Msaa
 					.GetWindows(null, MsaaRole.Window)
-					.Select(x => new MsaaItem(x))
+					.Select(x => { var item = new MsaaItem(); item.Load(x); return item; })
 					.Where(x => !string.IsNullOrEmpty(x.Name))
 					.Where(x => x.IsVisible && x.IsEnabled)
 					.ToList();
 				foreach (var window in windows)
 				{
-					MsaaWin32.GetWindowThreadProcessId(window.Handle, out uint processId);
+					MsaaWin32.GetWindowThreadProcessId(new IntPtr(window.Handle), out uint processId);
 					var process = Process.GetProcessById((int)processId);
 					if (process != null)
 					{
@@ -274,8 +271,8 @@ namespace JocysCom.Tools.E2EETool.Controls
 			ControlsHelper.Invoke(() =>
 			{
 				var isBusy = InfoPanel.Tasks.Count > 0;
-				ControlsHelper.SetEnabled(ShowProgramXmlButton, _SelectedWindowXml != null);
-				ControlsHelper.SetEnabled(ShowChatXmlButton, _ChatXml != null);
+				ControlsHelper.SetEnabled(ShowProgramXmlButton, _SelectedWindowMsaaItem != null);
+				ControlsHelper.SetEnabled(ShowChatXmlButton, _SelectedWindowMsaaItem != null);
 			});
 		}
 
@@ -287,7 +284,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			var title = (string)item.Content;
 			var index = (int)item.Tag;
 			_SelectedWindowProcess = _AllWindowProcesses[index];
-			_SelectedWindowMsaaItem = _AllWindowMsaaItems[index];
+			SelectedWindowMsaaItem = _AllWindowMsaaItems[index];
 			// Try to load automation settings.
 			var autoSettings = Global.AppSettings.AutoSettings.FirstOrDefault(x => x.Title == title);
 			if (autoSettings == null)
@@ -338,19 +335,29 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void ShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-			var xml = _SelectedWindowXml;
+			var item = SelectedWindowMsaaItem;
+			if (item == null)
+				return;
+
+			var xml = JocysCom.ClassLibrary.Runtime.Serializer.SerializeToXmlString(item);
+			ShowMessage(xml.ToString());
+			/*
+			List<MsaaItem> list = null;
+			// Get window XML and all relevant MSAA items
+			var xml = ToXml(item, ref list);
 			if (xml == null)
 				return;
 			ShowMessage(xml.ToString());
+			*/
 		}
 
 		private void ChatPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
-			var xml = _ChatXml;
-			if (xml == null)
-				return;
-			var xmlText = string.Join("\r\n", xml);
-			ShowMessage(xmlText.ToString());
+			//var xml = null;
+			//if (xml == null)
+			//	return;
+			//var xmlText = string.Join("\r\n", xml);
+			//ShowMessage(xmlText.ToString());
 		}
 
 
@@ -399,7 +406,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			if (editItem != null)
 			{
 				editItem.Focus();
-				focusHandle = editItem.Handle;
+				focusHandle = new IntPtr(editItem.Handle);
 			}
 			return focusHandle;
 		}

@@ -135,7 +135,7 @@
 					BorderThickness="0"
 					Click="ShowXmlButton_Click"
 					Content="Show XML" />
-				<Label Grid.Row="2" Grid.Column="0" Content="Chat XPath" />
+				<Label Grid.Row="2" Grid.Column="0" Content="Chat Path" />
 				<TextBox
 					x:Name="ChatPathTextBox"
 					Grid.Row="2"
@@ -175,7 +175,7 @@
 					<Label Content="Status:" Style="{StaticResource ButtonLabel}" />
 					<StackPanel Style="{StaticResource ButtonStackPanel}">
 						<ContentControl x:Name="ProgramStatusUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />
-						<Label Content="Target Program" x:Name="TargetProgramLabel" Style="{StaticResource ButtonLabel}" />
+						<Label x:Name="TargetProgramLabel" Content="Target Program" Style="{StaticResource ButtonLabel}" />
 					</StackPanel>
 					<StackPanel Style="{StaticResource ButtonStackPanel}">
 						<ContentControl x:Name="YourPrivateKeyUnknown" Content="{StaticResource Icon_Question}" Style="{StaticResource ButtonContentControl}" />

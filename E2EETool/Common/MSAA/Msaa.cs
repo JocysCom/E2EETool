@@ -36,12 +36,17 @@ namespace MSAA
 
 		public static MsaaItem GetAccessibleParent(MsaaItem item)
 		{
+			var mi = new MsaaItem();
 			if (item.ChildId != 0)
-				return new MsaaItem(item.Accessible, 0);
+			{
+				mi.Load(item.Accessible, 0);
+				return mi;
+			}
 			var p = (IAccessible)item.Accessible.accParent;
 			if (p == null)
 				return null;
-			return new MsaaItem(p, 0);
+			mi.Load(p, 0);
+			return mi;
 		}
 
 		/// <summary>
@@ -67,9 +72,12 @@ namespace MSAA
 
 		public static MsaaItem ObjectToMsaaItem(IAccessible acc, object o)
 		{
-			return (o is int childId)
-				? new MsaaItem(acc, childId)
-				: new MsaaItem((IAccessible)o);
+			var item = new MsaaItem();
+			if (o is int childId)
+				item.Load(acc, childId);
+			else
+				item.Load((IAccessible)o);
+			return item;
 		}
 
 		public static List<IAccessible> GetWindows(Regex windowName = null, params MsaaRole[] roles)
@@ -82,7 +90,8 @@ namespace MSAA
 				// If failed to retrieve the object then continue.
 				if (accItem == default(IAccessible))
 					continue;
-				var mi = new MsaaItem(accItem);
+				var mi = new MsaaItem();
+				mi.Load(accItem);
 				if (roles.Length > 0 && !roles.Contains(mi.Role))
 					continue;
 				// If filter by name specified but name don't match then continue.
@@ -196,6 +205,41 @@ namespace MSAA
 				return new MsaaItem[] { ObjectToMsaaItem(item.Accessible, selection) };
 			}
 		}
+
+		// 
+
+		public static MsaaItem[] PathSelectElements(MsaaItem item, string path)
+		{
+
+			var props = typeof(MsaaItem).GetProperties();
+			var rx = new Regex("\\/(?<all>\\/)?(?<role>\\w+)(\\[@(?<name>\\w+)=[\"'](?<value>\\w+)[\"']\\])?");
+			var results = new List<MsaaItem>();
+			var matches = rx.Matches(path);
+			foreach (Match m in matches)
+			{
+				var all = !string.IsNullOrEmpty(m.Groups["all"].Value);
+				var role = m.Groups["role"].Value;
+				var name = m.Groups["name"].Value;
+				var value = m.Groups["value"].Value;
+				var children = item.Children;
+				// If filter by role then...
+				if (!string.IsNullOrEmpty(role))
+				{
+					children = children
+						.Where(x => x.Role.ToString() == role)
+						.ToArray();
+				}
+				if (!string.IsNullOrEmpty(name))
+				{
+					var prop = props.FirstOrDefault(x => x.Name.ToString() == name);
+					children = children
+						.Where(x => Equals(prop.GetValue(x), value))
+						.ToArray();
+				}
+			}
+			return null;
+		}
+
 
 		/*
 		#region Get HTML object

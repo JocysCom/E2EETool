@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using MSAA;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using System.Diagnostics;
 using JocysCom.ClassLibrary.Processes;
 using JocysCom.ClassLibrary.Collections;
@@ -79,9 +78,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 			{
 				//ControlsHelper.Invoke(() => InfoPanel.AddTask(RefreshAutomationTreeTaskName));
 				// Get window XML and all relevant MSAA items
-				_SelectedWindowAllMsaaItems.Clear();
-				var xml = ToXml(selectedWindow, ref _SelectedWindowAllMsaaItems);
-				var chatPath = AutoSettings.ChatPath;
+				_SelectedWindowAllMsaaItems = MsaaSerializer.GetList(selectedWindow);
 				List<MessageItem> newItems;
 				messageParser.ParseMessages(_SelectedWindowAllMsaaItems, out newItems);
 				foreach (var item in newItems)
@@ -306,33 +303,6 @@ namespace JocysCom.Tools.E2EETool.Controls
 			});
 		}
 
-		public static XElement ToXml(MsaaItem item, ref List<MsaaItem> items)
-		{
-			var root = new XElement(item.Role.ToString());
-			if (!string.IsNullOrEmpty(item.Name))
-				root.SetAttributeValue(nameof(item.Name), item.Name);
-			if (!string.IsNullOrEmpty(item.Value))
-				root.SetAttributeValue(nameof(item.Value), item.Value);
-			if (!string.IsNullOrEmpty(item.DefaultAction))
-				root.SetAttributeValue(nameof(item.DefaultAction), item.DefaultAction);
-			if (!item.IsVisible)
-				root.SetAttributeValue(nameof(item.IsVisible), item.IsVisible);
-			if (!item.IsEnabled)
-				root.SetAttributeValue(nameof(item.IsEnabled), item.IsEnabled);
-			// Id which will be used to find original MsaaItem.
-			if (items != null)
-			{
-				item.Id = items.Count;
-				items.Add(item);
-			}
-			root.SetAttributeValue(nameof(item.Id), item.Id);
-			// Loop trough children.
-			foreach (var child in item.Children)
-				if (child.IsVisible)
-					root.Add(ToXml(child, ref items));
-			return root;
-		}
-
 		private void ShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
 			var item = SelectedWindowMsaaItem;
@@ -353,6 +323,10 @@ namespace JocysCom.Tools.E2EETool.Controls
 
 		private void ChatPathShowXmlButton_Click(object sender, System.Windows.RoutedEventArgs e)
 		{
+			var chatPath = AutoSettings.ChatPath;
+			_SelectedWindowAllMsaaItems = MsaaSerializer.GetList(SelectedWindowMsaaItem);
+			var items = MsaaSerializer.XPathSelectElements(SelectedWindowMsaaItem, chatPath, _SelectedWindowAllMsaaItems);
+
 			//var xml = null;
 			//if (xml == null)
 			//	return;

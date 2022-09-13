@@ -35,7 +35,7 @@ namespace MSAA
 		public MsaaState State { get => _State; set => _State = value; }
 		MsaaState _State;
 
-		public IAccessible Accessible => _Accessible;
+		public IAccessible Accessible { get => _Accessible; set => _Accessible = value; }
 		IAccessible _Accessible;
 
 		[XmlAttribute, DefaultValue(0)]
@@ -172,9 +172,9 @@ namespace MSAA
 		public MsaaItem[] Children
 		{
 			get { return _Children = _Children ?? Msaa.GetAccessibleChildren(this); }
-			set { _Children = Children; }
+			set { _Children = value; }
 		}
-		public MsaaItem[] _Children;
+		MsaaItem[] _Children;
 
 	}
 

@@ -24,7 +24,9 @@ namespace JocysCom.ClassLibrary.Controls
 
 		public static void AutoSizeByOpenForms(Window win, int addSize = -64)
 		{
-			var form = System.Windows.Forms.Application.OpenForms.Cast<System.Windows.Forms.Form>().First();
+			var form = System.Windows.Forms.Application.OpenForms.Cast<System.Windows.Forms.Form>().FirstOrDefault();
+			if (form == null)
+				return;
 			win.Width = form.Width + addSize;
 			win.Height = form.Height + addSize;
 			win.Top = form.Top - addSize / 2;
@@ -53,10 +55,14 @@ namespace JocysCom.ClassLibrary.Controls
 
 		#region Center Window
 
+		/// <summary>
+		/// Center window on Owner window.
+		/// </summary>
+		/// <param name="window"></param>
 		public static void CenterWindowOnApplication(Window window)
 		{
 			// Get WFF window first.
-			var win = System.Windows.Application.Current?.MainWindow;
+			var win = window.Owner;
 			System.Drawing.Rectangle? r = null;
 			var isNormal = false;
 			if (win != null)

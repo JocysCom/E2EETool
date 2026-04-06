@@ -1,13 +1,98 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace JocysCom.ClassLibrary.Processes
 {
 	public static class KeyboardHelper
 	{
+
+		internal class NativeMethods
+		{
+			internal const int INPUT_MOUSE = 0;
+			internal const int INPUT_KEYBOARD = 1;
+			internal const int INPUT_HARDWARE = 2;
+			internal const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+			internal const uint KEYEVENTF_KEYUP = 0x0002;
+			internal const uint KEYEVENTF_UNICODE = 0x0004;
+			internal const uint KEYEVENTF_SCANCODE = 0x0008;
+			internal const uint XBUTTON1 = 0x0001;
+			internal const uint XBUTTON2 = 0x0002;
+			internal const uint MOUSEEVENTF_MOVE = 0x0001;
+			internal const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+			internal const uint MOUSEEVENTF_LEFTUP = 0x0004;
+			internal const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
+			internal const uint MOUSEEVENTF_RIGHTUP = 0x0010;
+			internal const uint MOUSEEVENTF_MIDDLEDOWN = 0x0020;
+			internal const uint MOUSEEVENTF_MIDDLEUP = 0x0040;
+			internal const uint MOUSEEVENTF_XDOWN = 0x0080;
+			internal const uint MOUSEEVENTF_XUP = 0x0100;
+			internal const uint MOUSEEVENTF_WHEEL = 0x0800;
+			internal const uint MOUSEEVENTF_VIRTUALDESK = 0x4000;
+			internal const uint MOUSEEVENTF_ABSOLUTE = 0x8000;
+
+			internal struct INPUT
+			{
+				public int type;
+				public InputUnion u;
+			}
+
+			[StructLayout(LayoutKind.Explicit)]
+			internal struct InputUnion
+			{
+				[FieldOffset(0)]
+				public MOUSEINPUT mi;
+				[FieldOffset(0)]
+				public KEYBDINPUT ki;
+				[FieldOffset(0)]
+				public HARDWAREINPUT hi;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			internal struct MOUSEINPUT
+			{
+				public int dx;
+				public int dy;
+				public uint mouseData;
+				public uint dwFlags;
+				public uint time;
+				public IntPtr dwExtraInfo;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			internal struct KEYBDINPUT
+			{
+				/*Virtual Key code.  Must be from 1-254.  If the dwFlags member specifies KEYEVENTF_UNICODE, wVk must be 0.*/
+				public ushort wVk;
+				/*A hardware scan code for the key. If dwFlags specifies KEYEVENTF_UNICODE, wScan specifies a Unicode character which is to be sent to the foreground application.*/
+				public ushort wScan;
+				/*Specifies various aspects of a keystroke.  See the KEYEVENTF_ constants for more information.*/
+				public uint dwFlags;
+				/*The time stamp for the event, in milliseconds. If this parameter is zero, the system will provide its own time stamp.*/
+				public uint time;
+				/*An additional value associated with the keystroke. Use the GetMessageExtraInfo function to obtain this information.*/
+				public IntPtr dwExtraInfo;
+			}
+
+			[StructLayout(LayoutKind.Sequential)]
+			internal struct HARDWAREINPUT
+			{
+				public uint uMsg;
+				public ushort wParamL;
+				public ushort wParamH;
+			}
+
+			[DllImport("user32.dll")]
+			internal static extern IntPtr GetMessageExtraInfo();
+
+			[DllImport("user32.dll", SetLastError = true)]
+			internal static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+		}
+
 
 		#region Keyboard Event
 
@@ -26,7 +111,7 @@ namespace JocysCom.ClassLibrary.Processes
 		public static bool SendingKey;
 
 		/// <summary>SHIFT: +(key), CTRL: ^(key), ALT %(key)</summary>
-		public static void SendKey(string sKeys, string processName = null)
+		public static void SendKey(string sKeys)
 		{
 			SendingKey = true;
 			byte VK_NUMPAD0 = 0x60;
@@ -67,6 +152,77 @@ namespace JocysCom.ClassLibrary.Processes
 				System.Windows.Forms.SendKeys.Send(sKeys);
 			SendingKey = false;
 		}
+
+		#region Type Keys
+
+		/// <summary>
+		/// Sends keystrokes corresponding to the specified Unicode string to the currently active window.
+		/// </summary>
+		/// <param name="s">The string to send.</param>
+		/// <param name="millisecondsDelay">
+		///  Delay in milliseconds between typing each character:
+		/// - 0: Use this to paste the text without any typing delay.
+		/// - 20: Use this value to simulate typical AI typing speed.
+		/// - 200: Use this value to simulate typical human typing speed.
+		/// Default is 0, meaning it pastes immediately.
+		/// </param>
+		/// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+		public static async Task TypeKeys(string s, int millisecondsDelay = 0, CancellationToken cancellationToken = default)
+		{
+			// Loop through each Unicode character in the string.
+			foreach (char c in s)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				var inputs = new List<NativeMethods.INPUT>();
+				// First send a key down, then a key up.
+				foreach (bool keyUp in new bool[] { false, true })
+				{
+					// INPUT is a multi-purpose structure which can be used 
+					// for synthesizing keystrokes, mouse motions, and button clicks.
+					var input = new NativeMethods.INPUT
+					{
+						// Need a keyboard event.
+						type = NativeMethods.INPUT_KEYBOARD,
+						u = new NativeMethods.InputUnion
+						{
+							// KEYBDINPUT will contain all the information for a single keyboard event
+							// (more precisely, for a single key-down or key-up).
+							ki = new NativeMethods.KEYBDINPUT
+							{
+								// Virtual-key code must be 0 since we are sending Unicode characters.
+								wVk = 0,
+								// The Unicode character to be sent.
+								wScan = c,
+								// Indicate that we are sending a Unicode character.
+								// Also indicate key-up on the second iteration.
+								dwFlags = NativeMethods.KEYEVENTF_UNICODE | (keyUp ? NativeMethods.KEYEVENTF_KEYUP : 0),
+								dwExtraInfo = NativeMethods.GetMessageExtraInfo(),
+							}
+						}
+					};
+					// Add to the list (to be sent later).
+					inputs.Add(input);
+				}
+				// Send the inputs for this character
+				NativeMethods.SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf(typeof(NativeMethods.INPUT)));
+				if (millisecondsDelay > 0)
+				{
+					// Randomization amount set to ±20% of the delay.
+					var randomizeAmount = (int)(millisecondsDelay * 0.2);
+					var randomDelay = millisecondsDelay +
+						(randomizeAmount > 0 ? random.Next(-randomizeAmount, randomizeAmount + 1) : 0);
+					if (randomDelay > 0)
+						// Delay with cancellation support
+						await Task.Delay(randomDelay, cancellationToken);
+				}
+				if (cancellationToken.IsCancellationRequested)
+					return;
+			}
+		}
+
+		private static readonly Random random = new Random();
+
+		#endregion
 
 		public static void SendDown(params Key[] keys)
 			=> Send(true, false, keys);
@@ -116,9 +272,15 @@ namespace JocysCom.ClassLibrary.Processes
 		[DllImport("user32.dll")]
 		private static extern IntPtr GetForegroundWindow();
 
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		private static extern IntPtr SetFocus(IntPtr hWnd);
 
 		[return: MarshalAs(UnmanagedType.Bool)]
 		[DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -132,10 +294,34 @@ namespace JocysCom.ClassLibrary.Processes
 		private static uint GetVKey(Key key)
 			=> (uint)KeyInterop.VirtualKeyFromKey(key);
 
-		public static void SendText(IntPtr hWnd, string msg, bool pressEnter = false)
+		/// <summary>
+		/// Send text to the application.
+		/// </summary>
+		/// <param name="hWnd">Window handle.</param>
+		/// <param name="msg">Text message to send.</param>
+		/// <param name="useShiftEnter">Use SHIFT+ENTER instead of '\n', and ignore '\r'. Used for chat apps.</param>
+		/// <param name="pressEnter">Press enter at the end to submit message. Used for chat apps.</param>
+		public static void SendText(IntPtr hWnd, string msg, bool useShiftEnter = false, bool pressEnter = false)
 		{
 			foreach (char c in msg)
+			{
+				// If return and new line must be replaced with SHIF+ENTER
+				if (useShiftEnter)
+				{
+					if (c == '\r')
+						continue;
+					if (c == '\n')
+					{
+						// SendMessage or PostMessage can't be used to simulate the state of the modifiers keys properly.
+						// Use keybd_event to press SHIFT+ENTER/RETURN.
+						Send(Key.RightShift, Key.Return);
+						// Give some time for the target program to process the keys.
+						Task.Delay(50).Wait();
+						continue;
+					}
+				}
 				SendChar(hWnd, c, true);
+			}
 			if (pressEnter)
 				SendMessage(hWnd, GetVKey(Key.Return), true);
 		}
@@ -147,6 +333,16 @@ namespace JocysCom.ClassLibrary.Processes
 			if (SendMessage(hWnd, VM_CHAR, c, 0))
 				return false;
 			return true;
+		}
+
+		public static bool SendKeyDown(IntPtr hWnd, Key key)
+		{
+			return !SendMessage(hWnd, KEY_DOWN, GetVKey(key), GetLParam(1, GetVKey(key), 0, 0, 0, 0));
+		}
+
+		public static bool SendKeyUp(IntPtr hWnd, Key key)
+		{
+			return !SendMessage(hWnd, KEY_UP, GetVKey(key), GetLParam(1, GetVKey(key), 0, 0, 1, 1));
 		}
 
 		public static bool SendMessage(IntPtr hWnd, uint key, bool checkKeyboardState, int delay = 100)
@@ -168,21 +364,31 @@ namespace JocysCom.ClassLibrary.Processes
 		/// <summary>
 		/// Send message and optionaly focus message and return window.
 		/// </summary>
+		/// <param name="message">Text message to send.</param>
+		/// <param name="useShiftEnter">Use SHIFT+ENTER instead of '\n', and ignore '\r'. Used for chat apps.</param>
+		/// <param name="pressEnter">Press enter at the end to submit message. Used for chat apps.</param>
+		/// <param name="messageWindowHandle">Target window.</param>
+		/// <param name="messageWindowFocusHandle">Control handle to focus specified.</param>
+		/// <param name="returnWindowHandle">Handle of return window.</param>
 		public static bool SendTextMessage(
-			string message, bool pressEnter = false,
+			string message,
+			bool useShiftEnter = false, bool pressEnter = false,
 			IntPtr messageWindowHandle = default,
+			IntPtr messageWindowFocusHandle = default,
 			IntPtr returnWindowHandle = default
 		)
 		{
 			// Try to set target message window as foreground if not set yet.
-			if (messageWindowHandle != default || GetForegroundWindow() != returnWindowHandle)
+			if (messageWindowHandle != default || GetForegroundWindow() != messageWindowHandle)
 			{
-				if (!SetForegroundWindow(returnWindowHandle))
+				if (!SetForegroundWindow(messageWindowHandle))
 					return false;
 			}
-			SendText(returnWindowHandle, message, pressEnter);
+			if (messageWindowFocusHandle != IntPtr.Zero)
+				SetFocus(messageWindowFocusHandle);
+			SendText(messageWindowHandle, message, useShiftEnter, pressEnter);
 			if (returnWindowHandle != default)
-				SetForegroundWindow(messageWindowHandle);
+				SetForegroundWindow(returnWindowHandle);
 			return true;
 		}
 

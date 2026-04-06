@@ -2,9 +2,11 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace JocysCom.ClassLibrary.Controls
 {
@@ -13,21 +15,60 @@ namespace JocysCom.ClassLibrary.Controls
 	/// </summary>
 	public partial class InfoControl : UserControl
 	{
+
+
 		public InfoControl()
 		{
 			InitHelper.InitTimer(this, InitializeComponent);
-			if (!ControlsHelper.IsDesignMode(this))
-			{
-				var assembly = Assembly.GetEntryAssembly();
-				var product = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute))).Product;
-				var description = ((AssemblyDescriptionAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyDescriptionAttribute))).Description;
-				DefaultHead = product;
-				DefaultBody = description;
-				SetHead(DefaultHead);
-				SetBodyInfo(DefaultBody);
-				InitRotation();
-			}
+			if (ControlsHelper.IsDesignMode(this))
+				return;
+			// Get assemblies which will be used to select default (fists) and search for resources.
+			var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+			//var company = ((AssemblyCompanyAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyCompanyAttribute)))?.Company;
+			var product = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute)))?.Product;
+			var description = ((AssemblyDescriptionAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyDescriptionAttribute)))?.Description;
+			DefaultHead = product;
+			DefaultBody = description;
+			Reset();
+			CreateBusyIconAnimation();
+			// InitRotation();
+			HelpProvider.OnMouseEnter += HelpProvider_OnMouseEnter;
+			HelpProvider.OnMouseLeave += HelpProvider_OnMouseLeave;
+
 		}
+
+		public DoubleAnimationUsingKeyFrames animationBusyIcon = new DoubleAnimationUsingKeyFrames();
+		public Storyboard storyboardBusyIcon = new Storyboard();
+		private void CreateBusyIconAnimation()
+		{
+			// Animation properties.
+			Storyboard.SetTarget(animationBusyIcon, BusyIcon);
+			Storyboard.SetTargetProperty(animationBusyIcon, new PropertyPath("(UIElement.RenderTransform).(RotateTransform.Angle)"));
+			animationBusyIcon.KeyFrames.Add(new DiscreteDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0))));
+			animationBusyIcon.KeyFrames.Add(new LinearDoubleKeyFrame(360, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(6))));
+			// Storyboard properties.
+			storyboardBusyIcon.RepeatBehavior = RepeatBehavior.Forever;
+			storyboardBusyIcon.Children.Add(animationBusyIcon);
+			storyboardBusyIcon.Begin();
+		}
+
+		private void HelpProvider_OnMouseEnter(object sender, EventArgs e)
+		{
+			var control = (Control)sender;
+			var head = HelpProvider.GetHelpHead(control);
+			var body = HelpProvider.GetHelpBody(control, BodyMaxLength, true);
+			var image = HelpProvider.GetHelpImage(control);
+			SetHead(head);
+			SetBody(image, body);
+		}
+		public int BodyMaxLength { get; set; } = int.MaxValue;
+
+		private void HelpProvider_OnMouseLeave(object sender, EventArgs e)
+		{
+			Reset();
+		}
+
+		public InfoHelpProvider HelpProvider { get; set; } = new InfoHelpProvider();
 
 		#region ■ Properties
 
@@ -52,10 +93,16 @@ namespace JocysCom.ClassLibrary.Controls
 
 		#region Set Text
 
+		public void Reset()
+		{
+			SetHead(DefaultHead);
+			SetBodyInfo(DefaultBody);
+		}
+
 		public void SetTitle(string format, params object[] args)
 		{
 			var win = System.Windows.Window.GetWindow(this);
-			if (win == null)
+			if (win is null)
 				return;
 			win.Title = (args.Length == 0)
 				? format
@@ -65,7 +112,7 @@ namespace JocysCom.ClassLibrary.Controls
 		public void SetHead(string format, params object[] args)
 		{
 			// Apply format.
-			if (format == null)
+			if (format is null)
 				format = DefaultHead;
 			else if (args.Length > 0)
 				format = string.Format(format, args);
@@ -76,7 +123,7 @@ namespace JocysCom.ClassLibrary.Controls
 		public void SetBodyError(string content, params object[] args)
 		{
 			// Apply format.
-			if (content == null)
+			if (content is null)
 				content = DefaultBody;
 			else if (args.Length > 0)
 				content = string.Format(content, args);
@@ -87,7 +134,7 @@ namespace JocysCom.ClassLibrary.Controls
 		public void SetBodyInfo(string content, params object[] args)
 		{
 			// Apply format.
-			if (content == null)
+			if (content is null)
 				content = DefaultBody;
 			else if (args.Length > 0)
 				content = string.Format(content, args);
@@ -95,14 +142,29 @@ namespace JocysCom.ClassLibrary.Controls
 			SetBody(MessageBoxImage.Information, content);
 		}
 
+		public async void SetWithTimeout(MessageBoxImage image, string content = null, params object[] args)
+		{
+			SetBody(image, content, args);
+			var bodyText = BodyLabel.Text;
+			// The average minimal reading speed for adults is 16 characters per second.
+			// Use reading speed for adults as 14 characters per second.
+			// Add 4 extra seconds for realization and focus.
+			var waitSeconds = 4 + bodyText.Length / 14.0;
+			// Task code which waits for waitSeconds and executes code below.
+			await Task.Delay(TimeSpan.FromSeconds(waitSeconds));
+			if (bodyText == BodyLabel.Text)
+				Reset();
+		}
+
+
 		public void SetBody(MessageBoxImage image, string content = null, params object[] args)
 		{
-			if (content == null)
+			if (content is null)
 				content = DefaultBody;
 			else if (args.Length > 0)
 				content = string.Format(content, args);
 			BodyLabel.Text = content;
-			// Update body colors.
+			// Set body color and icon.
 			switch (image)
 			{
 				case MessageBoxImage.Error:
@@ -128,20 +190,8 @@ namespace JocysCom.ClassLibrary.Controls
 
 		#region Task and Rotating Icon
 
-		object _RightIconOriginalContent;
 		private readonly object TasksLock = new object();
 		public readonly BindingList<object> Tasks = new BindingList<object>();
-
-		private void InitRotation()
-		{
-			// Initialize rotation
-			_RotateTransform = new RotateTransform();
-			RightIcon.RenderTransform = _RotateTransform;
-			RightIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-			RotateTimer = new System.Timers.Timer();
-			RotateTimer.Interval = 25;
-			RotateTimer.Elapsed += RotateTimer_Elapsed;
-		}
 
 		/// <summary>Activate busy spinner.</summary>
 		public void AddTask(object name)
@@ -167,33 +217,21 @@ namespace JocysCom.ClassLibrary.Controls
 
 		public void UpdateIcon()
 		{
-			if (Tasks.Count > 0)
+			Dispatcher.Invoke(() =>
 			{
-				_RightIconOriginalContent = RightIcon.Content;
-				RightIcon.Content = Icons.Current[Icons.Icon_ProcessRight];
-				RightIcon.RenderTransform = _RotateTransform;
-				RotateTimer.Start();
-			}
-			else
-			{
-				RotateTimer.Stop();
-				RightIcon.RenderTransform = null;
-				_RotateTransform.Angle = 0;
-				RightIcon.Content = _RightIconOriginalContent;
-			}
-		}
-
-		RotateTransform _RotateTransform;
-		System.Timers.Timer RotateTimer;
-
-		private void RotateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-		{
-#pragma warning disable VSTHRD001 // Avoid legacy thread switching APIs
-			RightIcon.Dispatcher.Invoke(() =>
-#pragma warning restore VSTHRD001 // Avoid legacy thread switching APIs
-			{
-				var angle = (_RotateTransform.Angle + 2) % 360;
-				_RotateTransform.Angle = angle;
+				BusyCount.Content = Tasks.Count > 1 ? $"{Tasks.Count}" : "";
+				if (Tasks.Count > 0)
+				{
+					BusyIcon.Visibility = Visibility.Visible;
+					RightIcon.Visibility = Visibility.Hidden;
+					storyboardBusyIcon.Begin();
+				}
+				else
+				{
+					storyboardBusyIcon.Pause();
+					BusyIcon.Visibility = Visibility.Hidden;
+					RightIcon.Visibility = Visibility.Visible;
+				}
 			});
 		}
 
@@ -201,12 +239,14 @@ namespace JocysCom.ClassLibrary.Controls
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
-			if (ControlsHelper.IsDesignMode(this))
+			if (!ControlsHelper.AllowLoad(this))
 				return;
 		}
 
 		private void UserControl_Unloaded(object sender, RoutedEventArgs e)
 		{
+			if (!ControlsHelper.AllowUnload(this))
+				return;
 			_Image = null;
 		}
 

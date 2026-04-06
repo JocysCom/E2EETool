@@ -1,15 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
 	  <UseWindowsForms>true</UseWindowsForms>
 	  <Authors>Jocys.com</Authors>
     <Product>End-to-End Encryption Tool</Product>
     <ApplicationIcon>App.ico</ApplicationIcon>
     <Description>Protect and transmit sensitive information via unencrypted channels. Tools is using Elliptic Curve Diffie-Hellman (ECDH) key exchange (P-384 curve) and Advanced Encryption Standard (AES) 256-bit encryption algorithm.</Description>
-    <Version>1.1.7</Version>
+    <Version>1.2.6</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -90,7 +90,6 @@ namespace JocysCom.Tools.E2EETool
 			return decryptedBytes;
 		}
 
-		private static RNGCryptoServiceProvider _random = new RNGCryptoServiceProvider();
 		private static int _randomSize = 256 / 8;
 
 		public static byte[] AddRandom(byte[] bytes)
@@ -98,7 +97,7 @@ namespace JocysCom.Tools.E2EETool
 			// Append random prefix.
 			var ms = new MemoryStream();
 			var randomBytes = new byte[_randomSize];
-			_random.GetBytes(randomBytes);
+			RandomNumberGenerator.Fill(randomBytes);
 			ms.Write(randomBytes);
 			ms.Write(bytes);
 			var resultBytes = ms.ToArray();
@@ -153,107 +152,66 @@ namespace JocysCom.Tools.E2EETool
 			return sb.ToString();
 		}
 
+		// FIPS-approved authenticated encryption:
+		//   Key derivation: PBKDF2-HMAC-SHA256, 600,000 iterations (OWASP 2023)
+		//   Cipher:         AES-256-GCM (authenticated, no padding, FIPS-approved)
+		//   Output layout:  [16 salt][12 nonce][ciphertext][16 tag]
+		private const int Pbkdf2Iterations = 600_000;
+		private const int SaltSize = 16;
+		private const int NonceSize = 12; // AES-GCM standard nonce
+		private const int TagSize = 16;   // AES-GCM standard tag
+		private const int KeySize = 32;   // AES-256
+
 		/// <summary>
-		/// Encrypt string with AES-256 by using password.
+		/// Encrypt bytes with AES-256-GCM using a password-derived key.
 		/// </summary>
-		/// <param name="password">String password.</param>
-		/// <param name="bytes">Bytes to encrypt.</param>
-		/// <returns>Encrypted bytes.</returns>
 		public static byte[] Encrypt(byte[] password, byte[] bytes)
 		{
 			if (bytes == null)
 				throw new ArgumentNullException(nameof(bytes));
-			var encryptor = GetTransform(password, true);
-			var encryptedBytes = CipherStreamWrite(encryptor, bytes);
-			encryptor.Dispose();
-			// Return encrypted bytes.
-			return encryptedBytes;
+			// Fresh random salt and nonce for every encryption.
+			var salt = RandomNumberGenerator.GetBytes(SaltSize);
+			var nonce = RandomNumberGenerator.GetBytes(NonceSize);
+			var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256, KeySize);
+			var ciphertext = new byte[bytes.Length];
+			var tag = new byte[TagSize];
+			using (var aes = new AesGcm(key, TagSize))
+				aes.Encrypt(nonce, bytes, ciphertext, tag);
+			CryptographicOperations.ZeroMemory(key);
+			// Pack [salt][nonce][ciphertext][tag].
+			var output = new byte[SaltSize + NonceSize + ciphertext.Length + TagSize];
+			Buffer.BlockCopy(salt, 0, output, 0, SaltSize);
+			Buffer.BlockCopy(nonce, 0, output, SaltSize, NonceSize);
+			Buffer.BlockCopy(ciphertext, 0, output, SaltSize + NonceSize, ciphertext.Length);
+			Buffer.BlockCopy(tag, 0, output, SaltSize + NonceSize + ciphertext.Length, TagSize);
+			return output;
 		}
 
 		/// <summary>
-		/// Decrypt string with AES-256 by using password key.
+		/// Decrypt bytes produced by <see cref="Encrypt(byte[], byte[])"/>.
 		/// </summary>
-		/// <param name="password">String password.</param>
-		/// <param name="encryptedBytes">Encrypted bytes.</param>
-		/// <returns>Decrypted bytes.</returns>
 		public static byte[] Decrypt(byte[] password, byte[] bytes)
 		{
 			if (bytes == null)
 				throw new ArgumentNullException(nameof(bytes));
-			var decryptor = GetTransform(password, false);
-			var decryptedBytes = CipherStreamWrite(decryptor, bytes);
-			decryptor.Dispose();
-			// Return encrypted bytes.
-			return decryptedBytes;
+			if (bytes.Length < SaltSize + NonceSize + TagSize)
+				throw new CryptographicException("Ciphertext is too short.");
+			var cipherLen = bytes.Length - SaltSize - NonceSize - TagSize;
+			var salt = new byte[SaltSize];
+			var nonce = new byte[NonceSize];
+			var ciphertext = new byte[cipherLen];
+			var tag = new byte[TagSize];
+			Buffer.BlockCopy(bytes, 0, salt, 0, SaltSize);
+			Buffer.BlockCopy(bytes, SaltSize, nonce, 0, NonceSize);
+			Buffer.BlockCopy(bytes, SaltSize + NonceSize, ciphertext, 0, cipherLen);
+			Buffer.BlockCopy(bytes, SaltSize + NonceSize + cipherLen, tag, 0, TagSize);
+			var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256, KeySize);
+			var plaintext = new byte[cipherLen];
+			using (var aes = new AesGcm(key, TagSize))
+				aes.Decrypt(nonce, ciphertext, tag, plaintext);
+			CryptographicOperations.ZeroMemory(key);
+			return plaintext;
 		}
-
-
-		private static ICryptoTransform GetTransform(byte[] password, bool encrypt)
-		{
-			// Create an instance of the AES class. 
-			var provider = new AesCryptoServiceProvider();
-			// Calculate salt to make it harder to guess key by using a dictionary attack.
-			var salt = SaltFromPassword(password);
-			// Generate Secret Key from the password and salt.
-			// Note: Set number of iterations to 10 in order for JavaScript example to work faster.
-			// Rfc2898DeriveBytes generator based on HMACSHA1 by default.
-			// Ability to specify HMAC algorithm is available since .NET 4.7.2
-			var secretKey = new Rfc2898DeriveBytes(password, salt, 10);
-			// 32 bytes (256 bits) for the secret key and
-			// 16 bytes (128 bits) for the initialization vector (IV).
-			var key = secretKey.GetBytes(provider.KeySize / 8);
-			var iv = secretKey.GetBytes(provider.BlockSize / 8);
-			secretKey.Dispose();
-			// Create a cryptor from the existing SecretKey bytes.
-			var cryptor = encrypt
-				? provider.CreateEncryptor(key, iv)
-				: provider.CreateDecryptor(key, iv);
-			return cryptor;
-		}
-
-		/// <summary>
-		/// Generate salt from password.
-		/// </summary>
-		/// <param name="password">Password string.</param>
-		/// <returns>Salt bytes.</returns>
-		private static byte[] SaltFromPassword(byte[] passwordBytes)
-		{
-			var algorithm = new HMACSHA256();
-			algorithm.Key = passwordBytes;
-			var salt = algorithm.ComputeHash(passwordBytes);
-			algorithm.Dispose();
-			return salt;
-		}
-
-		/// <summary>
-		/// Encrypt/Decrypt with Write method.
-		/// </summary>
-		/// <param name="cryptor"></param>
-		/// <param name="input"></param>
-		/// <returns></returns>
-		private static byte[] CipherStreamWrite(ICryptoTransform cryptor, byte[] input)
-		{
-			var inputBuffer = new byte[input.Length];
-			// Copy data bytes to input buffer.
-			System.Buffer.BlockCopy(input, 0, inputBuffer, 0, inputBuffer.Length);
-			// Create a MemoryStream to hold the output bytes.
-			// CWE-404: Improper Resource Shutdown or Release
-			// Note: False Positive: cryptoStream.Close() will close underlying MemoryStream automatically.
-			var stream = new System.IO.MemoryStream();
-			// Create a CryptoStream through which we are going to be processing our data.
-			var cryptoStream = new CryptoStream(stream, cryptor, CryptoStreamMode.Write);
-			// Start the encrypting or decrypting process.
-			cryptoStream.Write(inputBuffer, 0, inputBuffer.Length);
-			// Finish encrypting or decrypting.
-			cryptoStream.FlushFinalBlock();
-			// Convert data from a memoryStream into a byte array.
-			var outputBuffer = stream.ToArray();
-			cryptoStream.Close();
-			// Underlying streams will be closed by default.
-			//stream.Close();
-			return outputBuffer;
-		}
-
 
 	}
 }

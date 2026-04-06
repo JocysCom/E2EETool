@@ -137,7 +137,7 @@ namespace JocysCom.Tools.E2EETool.Controls
 					var message = DataTextBox.Text;
 					SendMessage(message, MessageType.YourMessage);
 					DataTextBox.Text = string.Empty;
-					ControlsHelper.AutoScroll(this);
+					ControlsHelper.EnableAutoScroll(DataTextBox, true);
 				}
 				e.Handled = true;
 			}

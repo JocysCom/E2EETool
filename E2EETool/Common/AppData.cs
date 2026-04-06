@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using JocysCom.ClassLibrary.Configuration;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace JocysCom.Tools.E2EETool
 {
-	public class AppData : JocysCom.ClassLibrary.Configuration.ISettingsItem, INotifyPropertyChanged
+	public class AppData : SettingsItem, INotifyPropertyChanged
 	{
 
 		#region Main Properties
@@ -66,29 +66,5 @@ namespace JocysCom.Tools.E2EETool
 		public List<AppAutoSettings> AutoSettings { get => _AutoSettings; set => SetProperty(ref _AutoSettings, value); }
 		private List<AppAutoSettings> _AutoSettings;
 
-		#region ISettingsItem
-
-		public bool Enabled { get; set; }
-
-		public bool IsEmpty => false;
-
-		#endregion
-
-		#region ■ INotifyPropertyChanged
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected void SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
-		{
-			property = value;
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
-
-		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
-
-		#endregion
 	}
 }

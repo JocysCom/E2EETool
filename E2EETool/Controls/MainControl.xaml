@@ -53,13 +53,11 @@
 			Grid.Row="1"
 			Grid.Column="1"
 			MinWidth="85"
-			Margin="0,4,4,4"
-			VerticalAlignment="Center"
-			Click="GenerateButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_add}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Generate" Style="{StaticResource ButtonLabel}" />
+			Margin="0,0,3,3"
+			Click="GenerateButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_add}" />
+				<Label Content="Generate" />
 			</StackPanel>
 		</Button>
 		<TextBox
@@ -92,13 +90,12 @@
 			Grid.Row="3"
 			Grid.Column="1"
 			MinWidth="85"
-			Margin="0,0,4,0"
+			Margin="0,0,3,0"
 			VerticalAlignment="Center"
-			Click="CopyPublicKeyButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_copy}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Copy" Style="{StaticResource ButtonLabel}" />
+			Click="CopyPublicKeyButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_copy}" />
+				<Label Content="Copy" />
 			</StackPanel>
 		</Button>
 		<TextBox
@@ -133,11 +130,10 @@
 			MinWidth="85"
 			Margin="0,0,4,0"
 			VerticalAlignment="Center"
-			Click="PasteOtherPublicKeyButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_clipboard_paste}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Paste" Style="{StaticResource ButtonLabel}" />
+			Click="PasteOtherPublicKeyButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_clipboard_paste}" />
+				<Label Content="Paste" />
 			</StackPanel>
 		</Button>
 		<TextBox
@@ -180,11 +176,10 @@
 			Grid.Column="1"
 			MinWidth="85"
 			Margin="0,0,4,0"
-			Click="EncryptButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_inbox_into}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Encrypt" Style="{StaticResource ButtonLabel}" />
+			Click="EncryptButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_inbox_into}" />
+				<Label Content="Encrypt" />
 			</StackPanel>
 		</Button>
 		<TextBox
@@ -217,11 +212,10 @@
 			MinWidth="85"
 			Margin="0,0,4,0"
 			VerticalAlignment="Center"
-			Click="PasteEncryptedDataPublicKeyButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_clipboard_paste}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Paste" Style="{StaticResource ButtonLabel}" />
+			Click="PasteEncryptedDataPublicKeyButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_clipboard_paste}" />
+				<Label Content="Paste" />
 			</StackPanel>
 		</Button>
 		<TextBox
@@ -254,11 +248,10 @@
 			MinWidth="85"
 			Margin="0,0,4,0"
 			VerticalAlignment="Center"
-			Click="CopyEncryptedDataButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_copy}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Copy" Style="{StaticResource ButtonLabel}" />
+			Click="CopyEncryptedDataButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_copy}" />
+				<Label Content="Copy" />
 			</StackPanel>
 		</Button>
 		<TextBox
@@ -271,6 +264,7 @@
 			VerticalContentAlignment="Top"
 			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			BorderThickness="1"
 			FontFamily="Consolas"
 			IsReadOnly="True"
 			MinLines="5"
@@ -287,11 +281,10 @@
 			MinWidth="85"
 			Margin="0,0,0,0"
 			HorizontalAlignment="Left"
-			Click="DecryptButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_inbox_into}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Decrypt" Style="{StaticResource ButtonLabel}" />
+			Click="DecryptButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_inbox_into}" />
+				<Label Content="Decrypt" />
 			</StackPanel>
 		</Button>
 		<TextBlock
@@ -310,6 +303,7 @@
 			VerticalContentAlignment="Top"
 			AcceptsReturn="True"
 			Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			BorderThickness="1"
 			FontFamily="Consolas"
 			IsReadOnly="True"
 			MinLines="5"
@@ -349,11 +343,10 @@
 			MinWidth="85"
 			Margin="0,0,0,4"
 			HorizontalAlignment="Left"
-			Click="BrowseFileButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_FolderOpen}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Browse..." Style="{StaticResource ButtonLabel}" />
+			Click="BrowseFileButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_FolderOpen}" />
+				<Label Content="Browse..." />
 			</StackPanel>
 		</Button>
 		<Button
@@ -363,11 +356,10 @@
 			MinWidth="85"
 			Margin="0,0,4,4"
 			HorizontalAlignment="Right"
-			Click="EncryptFileButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_inbox_into}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Encrypt..." Style="{StaticResource ButtonLabel}" />
+			Click="EncryptFileButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_inbox_into}" />
+				<Label Content="Encrypt..." />
 			</StackPanel>
 		</Button>
 		<Button
@@ -377,11 +369,10 @@
 			MinWidth="85"
 			Margin="0,0,0,4"
 			HorizontalAlignment="Left"
-			Click="DecryptFileButton_Click"
-			Style="{StaticResource ToolBarButton}">
-			<StackPanel Style="{StaticResource ButtonStackPanel}">
-				<ContentControl Content="{StaticResource Icon_inbox_into}" Style="{StaticResource ButtonContentControl}" />
-				<Label Content="Decrypt..." Style="{StaticResource ButtonLabel}" />
+			Click="DecryptFileButton_Click">
+			<StackPanel>
+				<ContentControl Content="{StaticResource Icon_inbox_into}" />
+				<Label Content="Decrypt..." />
 			</StackPanel>
 		</Button>
 	</Grid>
